@@ -92,7 +92,7 @@ export default function LoginForm() {
               </FormItem>
             )}
           />
-          {error && <ErrorAlert message={error.message} />}
+          {error && <ErrorAlert message={"wrong email or password"} />}
 
           <Button
             type="submit"

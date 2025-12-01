@@ -72,7 +72,7 @@ export default function RegisterForm() {
                     <Input
                       error={!!form.formState.errors.firstName}
                       {...field}
-                      placeholder="Ahmed"
+                      placeholder="first name"
                     />
                   </FormControl>
                   <FormMessage />
@@ -89,7 +89,7 @@ export default function RegisterForm() {
                     <Input
                       error={!!form.formState.errors.lastName}
                       {...field}
-                      placeholder="Gomaa"
+                      placeholder="last name"
                     />
                   </FormControl>
                   <FormMessage />
@@ -145,7 +145,7 @@ export default function RegisterForm() {
                     defaultCountry="EG"
                     countrySelectProps={{ disabled: true }}
                     error={!!form.formState.errors.phone}
-                    placeholder="01012345678"
+                    placeholder="phone number"
                     {...field}
                   />
                 </FormControl>
