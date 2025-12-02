@@ -1,4 +1,5 @@
 "use client";
+import { ROUTES } from "@/lib/constants/routes";
 import { LoginFields } from "@/lib/types/auth-types/login";
 import { useMutation } from "@tanstack/react-query";
 import { signIn } from "next-auth/react";
@@ -18,7 +19,7 @@ export default function useLogin() {
     },
     onSuccess: () => {
       const params = new URLSearchParams(window.location.search);
-      const callbackUrl = params.get("callbackUrl") || "/";
+      const callbackUrl = params.get("callbackUrl") || ROUTES.DASHBOARD;
       window.location.replace(callbackUrl);
     },
   });

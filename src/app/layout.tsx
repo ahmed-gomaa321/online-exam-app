@@ -4,6 +4,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import AppProviders from "@/components/providers/app";
 import { Toaster } from "@/components/ui/sonner";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/auth";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -26,7 +28,7 @@ export const metadata: Metadata = {
   description: "online-exam",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -35,7 +37,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistMono.variable} ${inter.variable} antialiased`}>
         <AppProviders>
-          <main>{children}</main>
+          {children}
           <Toaster />
         </AppProviders>
       </body>

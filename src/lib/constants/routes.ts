@@ -3,4 +3,5 @@ export const enum ROUTES {
   REGISTER = "/register",
   FORGOT_PASSWORD = "/forgot-password",
   DASHBOARD = "/",
+  ACCOUNT_SETTINGS = "/account-settings",
 }
