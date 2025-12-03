@@ -1,3 +1,4 @@
+"use client";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -5,31 +6,29 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { useBreadcrumb } from "@/hooks/use-breadcrumb";
 import { SlashIcon } from "lucide-react";
 import React from "react";
 
-type BreadcrumbItemType = {
+export type BreadcrumbItemType = {
   label: string;
   href?: string;
 };
 
-interface DashboardBreadcrumbProps {
-  items: BreadcrumbItemType[];
-}
+export default function DashboardBreadcrumb() {
+  const items = useBreadcrumb();
+  const lastIndex = items.length - 1;
 
-export default function DashboardBreadcrumb({
-  items,
-}: DashboardBreadcrumbProps) {
   return (
     <Breadcrumb className="p-4">
       <BreadcrumbList>
         {items.map((item, index) => (
           <React.Fragment key={`${item.label}-${index}`}>
-            <BreadcrumbItem>
-              {item.href ? (
+            <BreadcrumbItem className="cursor-pointer">
+              {index !== lastIndex && item.href ? (
                 <BreadcrumbLink href={item.href}>{item.label}</BreadcrumbLink>
               ) : (
-                <span className="text-blue-600 font-medium">{item.label}</span>
+                <span className="text-blue-600 text-sm">{item.label}</span>
               )}
             </BreadcrumbItem>
             {index < items.length - 1 && (
