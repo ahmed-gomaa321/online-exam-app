@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/tooltip";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { ROUTES } from "@/lib/constants/routes";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -518,7 +519,10 @@ interface SidebarMenuItemProps extends React.ComponentProps<"li"> {
 const SidebarMenuItem = React.forwardRef<HTMLLIElement, SidebarMenuItemProps>(
   ({ href, children, className, ...props }, ref) => {
     const pathname = usePathname();
-    const isActive = pathname === href;
+    const isActive =
+      pathname === href ||
+      pathname.startsWith(`${href}/`) ||
+      (pathname.startsWith(`/exams`) && href === ROUTES.DASHBOARD);
 
     return (
       <Link className="w-full" href={href}>

@@ -23,7 +23,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
         success: <Check className="h-4 w-4 text-green-600" />,
         info: <Info className="h-4 w-4" />,
         warning: <TriangleAlert className="h-4 w-4" />,
-        error: <OctagonX className="h-4 w-4" />,
+        error: <OctagonX className="h-4 w-4 text-red-600" />,
         loading: <LoaderCircle className="h-4 w-4 animate-spin" />,
       }}
       toastOptions={{

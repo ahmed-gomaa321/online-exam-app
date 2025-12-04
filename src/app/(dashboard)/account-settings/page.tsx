@@ -1,3 +1,6 @@
+import { ROUTES } from "@/lib/constants/routes";
+import { redirect } from "next/navigation";
+
 export default function AccountSettings() {
-  return <div>AccountSettings</div>;
+  return redirect(ROUTES.PROFILE);
 }

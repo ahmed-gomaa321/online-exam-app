@@ -1,4 +1,3 @@
-import { email } from "zod";
 export type ForgotPasswordFields = {
   email: string;
 };
