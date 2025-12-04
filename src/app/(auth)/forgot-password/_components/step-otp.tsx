@@ -172,6 +172,7 @@ export default function StepOtp({
               <div className="font-medium flex items-center justify-center gap-1 text-sm">
                 <p className="text-gray-500">Didn’t receive the code? </p>
                 <button
+                  type="button"
                   onClick={handleResend}
                   className="text-blue-600 hover:text-blue-700 transition cursor-pointer active:scale-90"
                 >
