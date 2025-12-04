@@ -20,13 +20,27 @@ import { editProfileSchema } from "@/lib/schemes/account-settings.schemes";
 import useEditProfile from "../../_hooks/use-edit-profile";
 import { toast } from "sonner";
 import ErrorAlert from "@/app/(auth)/_components/error-alert";
+import ConfirmModal from "@/components/shared/confirm-modal";
+import useDeleteMyAccount from "../../_hooks/use-delete-my-account";
 
 export default function ProfileForm() {
+  // state
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
   // session data
   const { data: session, update } = useSession();
 
   //   react query
-  const { editProfile, isPending, error } = useEditProfile(update, session);
+  const {
+    editProfile,
+    isPending: isEditPending,
+    error: editError,
+  } = useEditProfile(update, session);
+  const {
+    deleteMyAccount,
+    isPending: isDeletePending,
+    error: deleteError,
+  } = useDeleteMyAccount();
 
   // react hook form
   const form = useForm<ProfileFormFields>({
@@ -95,6 +109,19 @@ export default function ProfileForm() {
         form.setError("root", { message: err.message, type: "server" });
       },
     });
+  };
+
+  // cancel delete account
+  const handleCancel = () => {
+    setIsDeleteModalOpen(false);
+  };
+
+  // confirm delete account
+  const handleConfirm = () => {
+    deleteMyAccount(undefined, {
+      onError: (err) => toast.error(err.message),
+    });
+    setIsDeleteModalOpen(false);
   };
 
   return (
@@ -202,22 +229,35 @@ export default function ProfileForm() {
             )}
           />
           {/* Error */}
-          {error && <ErrorAlert message={error.message} />}
+          {editError && <ErrorAlert message={editError.message} />}
+          {deleteError && <ErrorAlert message={deleteError.message} />}
           {/* Buttons */}
           <div className="grid grid-cols-2 gap-3 mt-4">
-            <Button className="font-medium py-2 bg-red-50 hover:bg-red-100 text-red-600">
-              Delete My Account
+            <Button
+              disabled={isDeletePending}
+              type="button"
+              onClick={() => setIsDeleteModalOpen(true)}
+              className="font-medium px-2 bg-red-50 hover:bg-red-100 text-red-600"
+            >
+              {isDeletePending ? "Deleting..." : "Delete My Account"}
             </Button>
             <Button
-              disabled={!form.formState.isDirty || isPending}
+              disabled={!form.formState.isDirty || isEditPending}
               type="submit"
-              className="font-medium py-2"
+              className="font-medium px-2"
             >
-              {isPending ? "Saving..." : "Save Changes"}
+              {isEditPending ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </form>
       </Form>
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        title="Are you sure you want to delete your account?"
+        description="This action is permanent and cannot be undone."
+        onCancel={handleCancel}
+        onConfirm={handleConfirm}
+      />
     </section>
   );
 }

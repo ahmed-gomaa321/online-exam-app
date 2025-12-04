@@ -519,11 +519,16 @@ interface SidebarMenuItemProps extends React.ComponentProps<"li"> {
 const SidebarMenuItem = React.forwardRef<HTMLLIElement, SidebarMenuItemProps>(
   ({ href, children, className, ...props }, ref) => {
     const pathname = usePathname();
+    const { setOpenMobile, isMobile } = useSidebar();
     const isActive =
       pathname === href ||
       pathname.startsWith(`${href}/`) ||
       (pathname.startsWith(`/exams`) && href === ROUTES.DASHBOARD);
 
+    // close sidebar on mobile when a link is clicked
+    const handleClick = () => {
+      if (isMobile) setOpenMobile(false);
+    };
     return (
       <Link className="w-full" href={href}>
         <li
@@ -536,6 +541,7 @@ const SidebarMenuItem = React.forwardRef<HTMLLIElement, SidebarMenuItemProps>(
               : "hover:bg-blue-100 hover:text-blue-600 text-gray-500 hover:border hover:border-blue-500",
             className
           )}
+          onClick={handleClick}
           {...props}
         >
           {children}
