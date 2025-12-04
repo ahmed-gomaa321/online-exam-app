@@ -15,8 +15,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { PasswordInput } from "@/components/shared/password-input";
 import { Button } from "@/components/ui/button";
-import { CircleX } from "lucide-react";
-import Link from "next/link";
 import { ROUTES } from "@/lib/constants/routes";
 import useRegister from "../_hooks/use-register";
 import { useForm } from "react-hook-form";
@@ -24,6 +22,7 @@ import FormFooter from "../../_components/form-footer";
 import ErrorAlert from "../../_components/error-alert";
 
 export default function RegisterForm() {
+  // react query
   const { register, isPending, error } = useRegister();
   //  react hook form
   const form = useForm<RegisterFields>({

@@ -23,12 +23,14 @@ export function useHeaderTitle(): HeaderTitleType {
 
   const [header, setHeader] = useState<HeaderTitleType>({
     title: "",
-    icon: CircleQuestionMark,
+    icon: GraduationCap,
   });
 
   const headerMap: Record<string, HeaderTitleType> = {
     [ROUTES.DASHBOARD]: { title: "Diplomas", icon: GraduationCap },
     [ROUTES.ACCOUNT_SETTINGS]: { title: "Account Settings", icon: UserRound },
+    [ROUTES.PROFILE]: { title: "Account Settings", icon: UserRound },
+    [ROUTES.CHANGE_PASSWORD]: { title: "Account Settings", icon: UserRound },
     [ROUTES.EXAMS]: { title: "Exams", icon: BookOpenCheck },
   };
 

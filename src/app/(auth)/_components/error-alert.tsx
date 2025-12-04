@@ -10,7 +10,7 @@ type ErrorAlertProps = {
 export default function ErrorAlert({ message }: ErrorAlertProps) {
   return (
     <p
-      className="relative text-red-600 text-sm border border-red-600 px-4 py-3 bg-red-50 text-center"
+      className="relative mt-2 text-red-600 text-sm border border-red-600 px-4 py-3 bg-red-50 text-center"
       role="alert"
     >
       <span className="absolute left-1/2 -translate-x-1/2 -top-3 flex items-center justify-center">

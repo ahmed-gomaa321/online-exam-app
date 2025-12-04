@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import profile from "@/../public/assets/images/profile photo.jpg";
 import Image from "next/image";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import {
   Tooltip,
   TooltipTrigger,
@@ -33,7 +33,10 @@ export function SidebarUserFooter({
   firstName,
   email,
 }: SidebarUserFooterProps) {
+  // hooks
+  const session = useSession();
   const router = useRouter();
+  // components items
   const dropDownItems: DropDownItem[] = [
     {
       label: "Account",
@@ -64,20 +67,20 @@ export function SidebarUserFooter({
         {/* Name + Email */}
         <div className="flex flex-col">
           <span className="font-semibold text-blue-600">
-            {firstName ?? "user"}
+            {session?.data?.user?.firstName ?? firstName}
           </span>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <span className="block max-w-[9rem] truncate text-sm text-gray-500">
-                  {email ?? "user-email@example.com"}
+                  {session?.data?.user?.email ?? email}
                 </span>
               </TooltipTrigger>
               <TooltipContent
                 side="top"
                 className="bg-blue-500 text-white py-2 px-3 rounded-none"
               >
-                <p className="text-sm">{email ?? "user-email@example.com"}</p>
+                <p className="text-sm">{session?.data?.user?.email ?? email}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

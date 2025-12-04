@@ -29,7 +29,6 @@ export function useBreadcrumb(): BreadcrumbItemType[] {
   }
 
   let path = "";
-  const examId = slugs[1];
 
   slugs.forEach((slug, index) => {
     path += `/${slug}`;
