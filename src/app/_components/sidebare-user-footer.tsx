@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import profile from "@/../public/assets/images/profile photo.jpg";
+import profile from "@/../public/assets/images/profile-photo.jpg";
 import Image from "next/image";
 import { signOut, useSession } from "next-auth/react";
 import {

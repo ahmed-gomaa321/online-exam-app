@@ -41,7 +41,7 @@ export default async function AccountSettingsLayout({
         </SidebarMenu>
         <LogOutButton />
       </aside>
-      <main className="bg-white p-6 col-span-3 overflow-auto max-h-[calc(100vh-224px)]">
+      <main className="bg-white p-6 col-span-3 overflow-auto xl:max-h-[calc(100vh-216px)]">
         {children}
       </main>
     </div>

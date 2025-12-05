@@ -1,5 +1,5 @@
 import { GraduationCap, UserRound } from "lucide-react";
-import finalLogo from "@/../public/assets/images/final logo.png";
+import finalLogo from "@/../public/assets/images/Final-Logo.png";
 import logo from "@/../public/favicon.ico";
 
 import {

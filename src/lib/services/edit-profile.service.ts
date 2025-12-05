@@ -3,6 +3,9 @@ import { ProfileFormFields } from "../types/account-settings-types/edit-profile"
 export async function editProfile(data: ProfileFormFields) {
   const res = await fetch("/api/edit-profile", {
     method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(data),
   });
 
