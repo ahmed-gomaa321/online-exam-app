@@ -1,6 +1,8 @@
+"use client";
 import { deleteMyAccount } from "@/lib/services/delete-my-account.service";
 import { useMutation } from "@tanstack/react-query";
 import { signOut } from "next-auth/react";
+import { toast } from "sonner";
 
 export default function useDeleteMyAccount() {
   const { isPending, error, mutate } = useMutation({
@@ -12,6 +14,7 @@ export default function useDeleteMyAccount() {
       return res;
     },
     onSuccess: async () => {
+      toast.success("Account deleted successfully");
       await signOut();
     },
   });

@@ -33,13 +33,20 @@ export const authOptions: AuthOptions = {
   ],
   callbacks: {
     jwt: ({ token, user, session, trigger }) => {
-      //  update session immediate when use update function from useSession()
-      if (trigger === "update" && session.user) {
-        return { ...token, ...session };
-      }
       if (user) {
         token.accessToken = user.accessToken;
         token.user = user.user;
+      }
+
+      if (trigger === "update" && session?.user) {
+        token.user = {
+          ...token.user,
+          ...session.user,
+        };
+      }
+
+      if (trigger === "update" && session?.accessToken) {
+        token.accessToken = session.accessToken;
       }
       return token;
     },
