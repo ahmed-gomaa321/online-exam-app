@@ -6,6 +6,6 @@ type ExameNameProps = {
   };
 };
 
-export default function page({ params: { id } }: ExameNameProps) {
+export default function ExameQuestions({ params: { id } }: ExameNameProps) {
   return <div>Exame {id}</div>;
 }

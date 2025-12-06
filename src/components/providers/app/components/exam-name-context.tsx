@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 
 type ExamNameContextType = {
   examName: string;
@@ -14,6 +14,20 @@ export const ExamNameContext = createContext<ExamNameContextType>({
 
 export function ExamNameProvider({ children }: { children: React.ReactNode }) {
   const [examName, setExamName] = useState("");
+
+  useEffect(() => {
+    const savedName = localStorage.getItem("examName");
+    if (savedName) {
+      setExamName(savedName);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (examName) {
+      localStorage.setItem("examName", examName);
+    }
+  }, [examName]);
+
   return (
     <ExamNameContext.Provider value={{ examName, setExamName }}>
       {children}
