@@ -1,7 +1,11 @@
+import { Suspense } from "react";
+import Diplomas from "./_components/diplomas";
+import Loading from "./loading";
+
 export default function Home() {
   return (
-    <div>
-      <h1>Home</h1>
-    </div>
+    <Suspense fallback={Loading()}>
+      <Diplomas />
+    </Suspense>
   );
 }
