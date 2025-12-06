@@ -15,7 +15,7 @@ import { useForm } from "react-hook-form";
 import useChangePassword from "../../_hooks/use-change-password";
 import { toast } from "sonner";
 import ErrorAlert from "@/app/(auth)/_components/error-alert";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 
 export default function ChangePasswordForm() {
   const { update } = useSession();
@@ -46,7 +46,11 @@ export default function ChangePasswordForm() {
 
       onError: (err) => {
         toast.dismiss();
-        toast.error(err.message),
+        toast.error(
+          err.message === "old password incorrect"
+            ? err.message
+            : "Something went wrong"
+        ),
           form.setError("root", { message: err.message, type: "server" });
       },
     });
@@ -108,7 +112,15 @@ export default function ChangePasswordForm() {
           />
 
           {/* Error */}
-          {error && <ErrorAlert message={"Something went wrong"} />}
+          {error && (
+            <ErrorAlert
+              message={
+                error.message === "old password incorrect"
+                  ? error.message
+                  : "Something went wrong"
+              }
+            />
+          )}
 
           {/* Buttons */}
           <Button disabled={isPending} className="font-medium px-2 mt-8">
