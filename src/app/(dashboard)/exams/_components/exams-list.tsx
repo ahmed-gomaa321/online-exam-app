@@ -7,8 +7,11 @@ import Link from "next/link";
 import { ROUTES } from "@/lib/constants/routes";
 import { useContext } from "react";
 import { ExamNameContext } from "@/components/providers/app/components/exam-name-context";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function ExamsList() {
+  // hooks
+  const isMobile = useIsMobile();
   // context
   const { setExamName } = useContext(ExamNameContext);
 
@@ -34,18 +37,21 @@ export default function ExamsList() {
             className="p-4 flex items-center justify-between bg-blue-50 hover:bg-blue-100 transition-colors duration-300 cursor-pointer"
           >
             <div className="flex flex-col gap-1">
-              <p className="text-blue-600 fw-semibold xl:text-xl">
+              <p className="text-blue-600 fw-semibold text-xs md:text-base xl:text-xl">
                 {exam.title}
               </p>
-              <span className="text-gray-500">
+              <span className="text-gray-500 text-xs md:text-base">
                 {exam.numberOfQuestions} Questions
               </span>
             </div>
 
             <div className="flex items-center gap-1">
               <Timer className="w-6 h-6 text-gray-400" />
-              <p className="text-gray-800 font-medium text-sm flex gap-1">
-                duration: <span>{exam.duration} minutes</span>
+              <p className="text-gray-800 font-medium text-xs md:text-sm flex gap-1">
+                duration:
+                <span>
+                  {exam.duration} {isMobile ? "min" : "minutes"}
+                </span>
               </p>
             </div>
           </Link>

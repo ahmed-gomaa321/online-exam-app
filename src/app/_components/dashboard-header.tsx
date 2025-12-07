@@ -24,7 +24,9 @@ export default function DashboardHeader() {
       )}
       <div className="flex items-center gap-2 p-4 bg-blue-600 w-full">
         {<item.icon className="size-11" />}
-        <h1 className="xl:text-3xl font-semibold font-inter">{item.title}</h1>
+        <h1 className="text-xs md:text-base xl:text-3xl font-semibold font-inter">
+          {item.title}
+        </h1>
       </div>
     </header>
   );
