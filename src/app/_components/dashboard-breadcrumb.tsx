@@ -26,11 +26,16 @@ export default function DashboardBreadcrumb() {
           <React.Fragment key={`${item.label}-${index}`}>
             <BreadcrumbItem className="cursor-pointer">
               {index !== lastIndex && item.href ? (
-                <BreadcrumbLink className="active:scale-90" href={item.href}>
+                <BreadcrumbLink
+                  className="active:scale-90 text-xs md:text-sm"
+                  href={item.href}
+                >
                   {item.label}
                 </BreadcrumbLink>
               ) : (
-                <span className="text-blue-600 text-sm">{item.label}</span>
+                <span className="text-blue-600 text-xs md:text-sm">
+                  {item.label}
+                </span>
               )}
             </BreadcrumbItem>
             {index < items.length - 1 && (

@@ -26,7 +26,9 @@ export default async function DashboardLayout({
           <DashboardBreadcrumb />
         </nav>
         <DashboardHeader />
-        <main className="w-full xl:px-6 xl:h-full pb-6">{children}</main>
+        <main className="w-full xl:px-6 xl:h-full pb-6 relative">
+          {children}
+        </main>
       </div>
     </SidebarProvider>
   );
