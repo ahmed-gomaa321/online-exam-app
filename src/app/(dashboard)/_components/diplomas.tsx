@@ -28,6 +28,10 @@ export default function Diplomas() {
 
   const flatDiplomas = diplomas?.pages.flatMap((page) => page.subjects) || [];
 
+  // save diploma title in local storage
+  const saveDiplomaTitle = (title: string) =>
+    localStorage.setItem("diploma-title", title);
+
   return (
     <InfiniteScroll
       dataLength={flatDiplomas.length}
@@ -37,13 +41,18 @@ export default function Diplomas() {
     >
       <section className="px-4 xl:px-0 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
         {flatDiplomas.map((item) => (
-          <Link key={item._id} href={ROUTES.EXAMS}>
+          <Link
+            onClick={() => saveDiplomaTitle(item.name)}
+            key={item._id}
+            href={ROUTES.EXAMS}
+          >
             <figure className="relative w-full h-[448px] overflow-hidden">
               <Image
-                quality={80}
+                quality={100}
                 src={item.icon}
                 alt={item.name}
                 fill
+                sizes="100%"
                 className="object-cover hover:scale-105 transition-all duration-300"
               />
               <div className="absolute bottom-2 left-2 right-2 px-4 py-5 bg-blue-600/50 text-white backdrop-blur">

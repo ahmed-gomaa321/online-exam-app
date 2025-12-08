@@ -26,7 +26,7 @@ export default async function DashboardLayout({
           <DashboardBreadcrumb />
         </nav>
         <DashboardHeader />
-        <main className="w-full xl:px-6 xl:h-full pb-6 relative">
+        <main className="w-full xl:px-6 h-full pb-6 relative overflow-hidden">
           {children}
         </main>
       </div>
