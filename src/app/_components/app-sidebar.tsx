@@ -45,6 +45,7 @@ export async function AppSidebar() {
               alt="final logo"
               width={192}
               height={37}
+              priority
             ></Image>
           </figure>
           <div className="flex items-center">

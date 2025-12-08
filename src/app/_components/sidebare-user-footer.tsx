@@ -55,12 +55,14 @@ export function SidebarUserFooter({
     <div className="flex items-center justify-between ps-0 p-4">
       <div className="flex items-center gap-3">
         {/* Profile Picture */}
-        <figure className="size-[54px] overflow-hidden relative border border-blue-600">
+        <figure className="w-[54px] h-[54px] overflow-hidden relative border border-blue-600">
           <Image
             src={profile}
             alt="User"
             fill
             className="object-cover object-[center_15%]"
+            priority
+            sizes="54px"
           />
         </figure>
 

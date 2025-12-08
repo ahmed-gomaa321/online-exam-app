@@ -48,10 +48,11 @@ export default function Diplomas() {
           >
             <figure className="relative w-full h-[448px] overflow-hidden">
               <Image
-                quality={80}
+                quality={100}
                 src={item.icon}
                 alt={item.name}
                 fill
+                sizes="100%"
                 className="object-cover hover:scale-105 transition-all duration-300"
               />
               <div className="absolute bottom-2 left-2 right-2 px-4 py-5 bg-blue-600/50 text-white backdrop-blur">

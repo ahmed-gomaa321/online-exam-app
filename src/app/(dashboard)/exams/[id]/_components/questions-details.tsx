@@ -55,7 +55,8 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
   };
 
   //   navigation functions
-  const currentExam = questions?.questions[currentQuestionIndex].exam?.title;
+  const currentExam =
+    questions?.questions?.[currentQuestionIndex]?.exam?.title ?? null;
   const handleNext = () => {
     if (currentQuestionIndex < totalQuestions - 1)
       setCurrentQuestionIndex((p) => {
@@ -93,8 +94,8 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
   //   finish questions
   const handleFinish = () => {
     if (!questions) return;
-
-    const totalSeconds = questions.questions[0].exam.duration * 60;
+    const duration = questions.questions[0]?.exam.duration ?? 0;
+    const totalSeconds = duration * 60;
     const spentSeconds = totalSeconds - timeLeft;
     const spentMinutes = Math.floor(spentSeconds / 60);
 
@@ -111,7 +112,7 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
   useEffect(() => {
     const savedTime = localStorage.getItem(`time-${currentExam}`);
     if (questions?.questions.length && !savedTime) {
-      const duration = questions?.questions[0].exam.duration;
+      const duration = questions?.questions[0]?.exam.duration ?? 0;
       setTimeLeft(duration * 60);
     }
   }, [questions, timeLeft]);
@@ -138,6 +139,13 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
     }
   }, [currentExam]);
 
+  //   progress degre
+  const durationSeconds = questions?.questions?.[0]?.exam?.duration
+    ? questions.questions[0].exam.duration * 60
+    : 1;
+
+  const progressDeg = ((durationSeconds - timeLeft) / durationSeconds) * 360;
+
   if (isLoading) return <Loading />;
   if (error)
     return <p className="bg-red-50 p-4 text-red-500">Error: {error.message}</p>;
@@ -153,7 +161,7 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
       {/* Header */}
       <div className="flex justify-between items-center text-xs md:text-sm text-gray-500">
         <div>
-          {diplomaTitle} - {examName}
+          {diplomaTitle && diplomaTitle} - {examName && examName}
         </div>
         <div className="flex gap-2 items-center">
           Question
@@ -227,14 +235,7 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
           <div
             className="relative w-[50px] h-[50px] xl:w-[60px] xl:h-[60px] rounded-full flex justify-center items-center"
             style={{
-              background: `conic-gradient(
-                #e0f2fe ${
-                  ((questions.questions[0].exam.duration * 60 - timeLeft) /
-                    (questions.questions[0].exam.duration * 60)) *
-                  360
-                }deg,
-                #2563eb 0deg
-              )`,
+              background: `conic-gradient(#e0f2fe ${progressDeg}deg, #2563eb 0deg)`,
             }}
           >
             <div className="w-[40px] h-[40px] xl:w-[40px] xl:h-[40px] rounded-full bg-white flex justify-center items-center">
