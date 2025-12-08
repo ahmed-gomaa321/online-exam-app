@@ -1,4 +1,5 @@
 import React from "react";
+import QuestionsDetails from "./_components/questions-details";
 
 type ExameNameProps = {
   params: {
@@ -7,5 +8,5 @@ type ExameNameProps = {
 };
 
 export default function ExameQuestions({ params: { id } }: ExameNameProps) {
-  return <div>Exame {id}</div>;
+  return <QuestionsDetails examId={id} />;
 }
