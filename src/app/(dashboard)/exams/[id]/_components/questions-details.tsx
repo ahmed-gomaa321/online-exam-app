@@ -32,7 +32,7 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
   const [answers, setAnswers] = useState<UserAnswer[]>([]);
   const [timeLeft, setTimeLeft] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
-  const [isInitialLoad, setIsInitialLoad] = useState(true); // لمنع submit بعد refresh
+  const [isInitialLoad, setIsInitialLoad] = useState(true); 
 
   const totalQuestions = questions?.questions.length ?? 0;
   const currentQuestion = questions?.questions[currentQuestionIndex] ?? null;
@@ -72,10 +72,8 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
     const durationMinutes = questions?.questions[0].exam.duration ?? 0;
     const totalSeconds = durationMinutes * 60;
 
-    // فرق بين refresh و restart
     let savedStart = localStorage.getItem(`time-startTime-${currentExam}`);
     if (!savedStart) {
-      // restart أو أول مرة → startTime جديد
       savedStart = Date.now().toString();
       localStorage.setItem(`time-startTime-${currentExam}`, savedStart);
     }
@@ -86,7 +84,7 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
     });
     setTimeLeft(rem > 0 ? rem : 0);
 
-    setIsInitialLoad(false); // بعد استرجاع كل state
+    setIsInitialLoad(false);
   }, [currentExam, totalQuestions]);
 
   // Timer countdown
@@ -187,7 +185,6 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
     localStorage.removeItem(`exam-${currentExam}`);
     localStorage.removeItem(`exam-answers-${currentExam}`);
 
-    // عند restart → نعمل startTime جديد
     const duration = questions?.questions[0].exam.duration ?? 0;
     const now = Date.now();
     localStorage.setItem(`time-startTime-${currentExam}`, now.toString());
