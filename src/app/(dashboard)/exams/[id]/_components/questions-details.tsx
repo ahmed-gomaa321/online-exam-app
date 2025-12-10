@@ -3,258 +3,359 @@
 import { ExamNameContext } from "@/components/providers/app/components/exam-name-context";
 import { useContext, useEffect, useState } from "react";
 import useQuestions from "../../_hooks/use-questions";
+import useQuestionsResults from "../../_hooks/use-questions-results";
 import Loading from "@/app/loading";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  FolderSearch,
+  RotateCcw,
+} from "lucide-react";
 import { UserAnswer } from "@/lib/types/questions";
 import { formatTime } from "../../_utils/formate-time";
 import { getRemainingTime } from "../../_utils/exam-time";
+import { toast } from "sonner";
+import Result from "./result";
+import { useRouter } from "next/navigation";
+import { ROUTES } from "@/lib/constants/routes";
 
 export default function QuestionsDetails({ examId }: { examId: string }) {
-  //   hooks
+  const router = useRouter();
   const { examName } = useContext(ExamNameContext);
+
+  const { data: questions, isLoading, error } = useQuestions(examId);
+  const { data: results, isPending, submitExam } = useQuestionsResults();
+
   const [diplomaTitle, setDiplomaTitle] = useState("");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<UserAnswer[]>([]);
   const [timeLeft, setTimeLeft] = useState(0);
-  const { data: questions, isLoading, error } = useQuestions(examId);
+  const [isFinished, setIsFinished] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true); // لمنع submit بعد refresh
 
   const totalQuestions = questions?.questions.length ?? 0;
+  const currentQuestion = questions?.questions[currentQuestionIndex] ?? null;
+  const currentExam = currentQuestion?.exam?.title ?? null;
 
-  //   Set diploma title from local storage
+  // Load diploma title
   useEffect(() => {
     const title = localStorage.getItem("diploma-title");
     if (title) setDiplomaTitle(title);
   }, []);
 
-  //   Calculate progress
-  const progress = totalQuestions
-    ? ((currentQuestionIndex + 1) / totalQuestions) * 100
-    : 0;
+  // Restore exam state
+  useEffect(() => {
+    if (!currentExam || totalQuestions === 0) return;
 
-  //   Select answer
-  const currentQuestion = questions?.questions[currentQuestionIndex] ?? null;
+    const finished =
+      localStorage.getItem(`exam-finished-${currentExam}`) === "true";
+    setIsFinished(finished);
+    if (finished) {
+      setTimeLeft(0);
+      setIsInitialLoad(false);
+      return;
+    }
+
+    const savedAnswers = localStorage.getItem(`exam-answers-${currentExam}`);
+    if (savedAnswers) {
+      try {
+        setAnswers(JSON.parse(savedAnswers));
+      } catch {
+        setAnswers([]);
+      }
+    }
+
+    const savedIndex = localStorage.getItem(`exam-${currentExam}`);
+    if (savedIndex) setCurrentQuestionIndex(parseInt(savedIndex));
+
+    const durationMinutes = questions?.questions[0].exam.duration ?? 0;
+    const totalSeconds = durationMinutes * 60;
+
+    // فرق بين refresh و restart
+    let savedStart = localStorage.getItem(`time-startTime-${currentExam}`);
+    if (!savedStart) {
+      // restart أو أول مرة → startTime جديد
+      savedStart = Date.now().toString();
+      localStorage.setItem(`time-startTime-${currentExam}`, savedStart);
+    }
+
+    const rem = getRemainingTime({
+      duration: totalSeconds,
+      startTime: savedStart,
+    });
+    setTimeLeft(rem > 0 ? rem : 0);
+
+    setIsInitialLoad(false); // بعد استرجاع كل state
+  }, [currentExam, totalQuestions]);
+
+  // Timer countdown
+  useEffect(() => {
+    if (isFinished || timeLeft <= 0) return;
+
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => (prev > 1 ? prev - 1 : 0));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [timeLeft, isFinished]);
+
+  // Auto-finish when time = 0
+  useEffect(() => {
+    if (timeLeft === 0 && !isFinished && totalQuestions > 0 && !isInitialLoad) {
+      handleFinish();
+    }
+  }, [timeLeft, isFinished, totalQuestions, isInitialLoad]);
+
+  // Handle answer selection
   const handleSelectAnswer = (answerKey: string) => {
     if (!currentQuestion) return;
 
     setAnswers((prev) => {
-      const exists = prev.find(
-        (answer) => answer.questionId === currentQuestion._id
+      const exist = prev.find((a) => a.questionId === currentQuestion._id);
+      const updatedAnswers = exist
+        ? prev.map((a) =>
+            a.questionId === currentQuestion._id
+              ? { ...a, correct: answerKey }
+              : a
+          )
+        : [...prev, { questionId: currentQuestion._id, correct: answerKey }];
+
+      localStorage.setItem(
+        `exam-answers-${currentExam}`,
+        JSON.stringify(updatedAnswers)
       );
-
-      if (exists) {
-        return prev.map((answer) =>
-          answer.questionId === currentQuestion._id
-            ? { ...answer, correct: answerKey }
-            : answer
-        );
-      }
-
-      return [...prev, { questionId: currentQuestion._id, correct: answerKey }];
+      return updatedAnswers;
     });
   };
 
-  //   navigation functions
-  const currentExam =
-    questions?.questions?.[currentQuestionIndex]?.exam?.title ?? null;
+  // Navigation
   const handleNext = () => {
-    if (currentQuestionIndex < totalQuestions - 1)
-      setCurrentQuestionIndex((p) => {
-        const nextIndex = p + 1;
-        localStorage.setItem(`exam-${currentExam}`, nextIndex.toString());
-        return nextIndex;
-      });
+    if (!currentExam || currentQuestionIndex >= totalQuestions - 1) return;
+    const next = currentQuestionIndex + 1;
+    setCurrentQuestionIndex(next);
+    localStorage.setItem(`exam-${currentExam}`, next.toString());
   };
 
   const handlePrevious = () => {
-    if (currentQuestionIndex > 0)
-      setCurrentQuestionIndex((p) => {
-        const prevIndex = p - 1;
-        localStorage.setItem(`exam-${currentExam}`, prevIndex.toString());
-        return prevIndex;
-      });
+    if (!currentExam || currentQuestionIndex <= 0) return;
+    const prev = currentQuestionIndex - 1;
+    setCurrentQuestionIndex(prev);
+    localStorage.setItem(`exam-${currentExam}`, prev.toString());
   };
 
-  //   Timer interval
-  useEffect(() => {
-    if (timeLeft === 0) return;
-    const timer = setInterval(() => {
-      setTimeLeft((p) => {
-        localStorage.setItem(`time-${currentExam}`, (p - 1).toString());
-        localStorage.setItem(
-          `time-startTime-${currentExam}`,
-          Date.now().toString()
-        );
-        return p - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [timeLeft]);
-
-  //   finish questions
+  // Finish exam
   const handleFinish = () => {
-    if (!questions) return;
-    const duration = questions.questions[0]?.exam.duration ?? 0;
+    if (!questions || isFinished) return;
+
+    const duration = questions.questions[0].exam.duration ?? 0;
     const totalSeconds = duration * 60;
     const spentSeconds = totalSeconds - timeLeft;
     const spentMinutes = Math.floor(spentSeconds / 60);
 
-    const payload = {
-      answers,
-      time: spentMinutes,
-    };
+    const finalAnswers = questions.questions.map((q) => {
+      const userAnswer = answers.find((a) => a.questionId === q._id);
+      return {
+        questionId: q._id,
+        correct: userAnswer?.correct ?? "not answered",
+      };
+    });
 
-    // todo send request to bake end
-    console.log("Submitting exam:", payload);
+    submitExam(
+      { answers: finalAnswers, time: spentMinutes },
+      {
+        onSuccess: (res) => {
+          localStorage.setItem("exam-results", JSON.stringify(res));
+          toast.success("Submitted successfully");
+          localStorage.setItem(`exam-finished-${currentExam}`, "true");
+          setIsFinished(true);
+        },
+        onError: (err) => {
+          localStorage.removeItem(`exam-finished-${currentExam}`);
+          setIsFinished(false);
+          toast.error(err.message);
+        },
+      }
+    );
   };
 
-  //   Set exam duration
-  useEffect(() => {
-    const savedTime = localStorage.getItem(`time-${currentExam}`);
-    if (questions?.questions.length && !savedTime) {
-      const duration = questions?.questions[0]?.exam.duration ?? 0;
-      setTimeLeft(duration * 60);
-    }
-  }, [questions, timeLeft]);
+  // Restart exam
+  const handleRestart = () => {
+    if (!currentExam) return;
 
-  //   Handle auto finish
-  useEffect(() => {
-    if (timeLeft === 0 && questions) handleFinish();
-    // todo navigate to result
-  }, [timeLeft, questions]);
+    localStorage.removeItem(`exam-finished-${currentExam}`);
+    localStorage.removeItem(`exam-${currentExam}`);
+    localStorage.removeItem(`exam-answers-${currentExam}`);
 
-  //   get current question and saved time index from local storage
-  useEffect(() => {
-    // question index
-    const savedQuestionIndex = localStorage.getItem(`exam-${currentExam}`);
-    if (savedQuestionIndex) {
-      setCurrentQuestionIndex(parseInt(savedQuestionIndex));
-    }
-    // time
-    const savedTime = localStorage.getItem(`time-${currentExam}`);
-    const savedtartTime = localStorage.getItem(`time-startTime-${currentExam}`);
-    if (savedTime && savedtartTime) {
-      const remainingTime = getRemainingTime({ savedTime, savedtartTime });
-      setTimeLeft(remainingTime > 0 ? remainingTime : 0);
-    }
-  }, [currentExam]);
+    // عند restart → نعمل startTime جديد
+    const duration = questions?.questions[0].exam.duration ?? 0;
+    const now = Date.now();
+    localStorage.setItem(`time-startTime-${currentExam}`, now.toString());
+    setTimeLeft(duration * 60);
 
-  //   progress degre
-  const durationSeconds = questions?.questions?.[0]?.exam?.duration
-    ? questions.questions[0].exam.duration * 60
-    : 1;
+    setIsFinished(false);
+    setCurrentQuestionIndex(0);
+    setAnswers([]);
+    setIsInitialLoad(true);
+  };
 
-  const progressDeg = ((durationSeconds - timeLeft) / durationSeconds) * 360;
+  const handleExplore = () => router.replace(ROUTES.EXAMS);
 
   if (isLoading) return <Loading />;
-  if (error)
-    return <p className="bg-red-50 p-4 text-red-500">Error: {error.message}</p>;
-  if (!questions?.questions.length)
-    return (
-      <p className="bg-gray-100 text-gray-500 p-4 w-full text-center">
-        No questions found.
-      </p>
-    );
+  if (error) return <p>Error: {error.message}</p>;
+  if (!questions?.questions.length) return <p>No questions found.</p>;
+
+  const progress = totalQuestions
+    ? ((isFinished ? totalQuestions : currentQuestionIndex + 1) /
+        totalQuestions) *
+      100
+    : 0;
+
+  const durationSeconds = questions.questions[0].exam.duration * 60;
+  const progressDeg = ((durationSeconds - timeLeft) / durationSeconds) * 360;
 
   return (
     <section className="bg-white p-6 flex flex-col gap-6">
       {/* Header */}
-      <div className="flex justify-between items-center text-xs md:text-sm text-gray-500">
+      <div className="flex flex-col gap-3 md:gap-0 md:flex-row md:justify-between text-gray-500 text-xs md:text-sm">
         <div>
-          {diplomaTitle && diplomaTitle} - {examName && examName}
+          {diplomaTitle} - {examName}
         </div>
-        <div className="flex gap-2 items-center">
+        <div className="flex items-center gap-1">
           Question
-          <span className="text-blue-600 font-bold">
-            {currentQuestionIndex + 1}
+          <span className="font-bold text-sm text-blue-600">
+            {isFinished || results ? totalQuestions : currentQuestionIndex + 1}
           </span>
           of {totalQuestions}
         </div>
       </div>
 
-      {/* Progress */}
+      {/* Progress Bar */}
       <div className="h-4 bg-gray-200">
         <div
-          className="h-4 bg-blue-600 transition-all duration-300"
+          className="h-4 bg-blue-600"
           style={{ width: `${progress}%` }}
         ></div>
       </div>
 
       {/* Question */}
-      <div className="flex flex-col gap-4">
-        <p className="font-semibold md:text-2xl text-blue-600">
-          {currentQuestion?.question}
-        </p>
-
-        <div className="flex flex-col gap-2">
-          {currentQuestion?.answers.map((a) => {
-            const selected =
-              answers.find(
-                (answer) => answer.questionId === currentQuestion._id
-              )?.correct === a.key;
-
-            return (
-              <button
-                key={a.answer}
-                className={`p-4 text-left flex items-center gap-2 border transition-colors ${
-                  selected
-                    ? "bg-blue-100 border-blue-600"
-                    : "bg-gray-50 border-gray-200 hover:bg-gray-100"
-                }`}
-                onClick={() => handleSelectAnswer(a.key)}
-              >
-                <span
-                  className={`w-4 h-4 rounded-full border relative ${
-                    selected ? "border-blue-600" : "border-gray-300"
-                  }`}
+      {!isFinished ? (
+        <section>
+          <p className="font-semibold md:text-2xl text-blue-600">
+            {currentQuestion?.question}
+          </p>
+          <div className="flex flex-col gap-2 mt-4 xl:mt-0">
+            {currentQuestion?.answers.map((a) => {
+              const selected =
+                answers.find((ans) => ans.questionId === currentQuestion?._id)
+                  ?.correct === a.key;
+              return (
+                <button
+                  key={a.key}
+                  className="p-4 flex gap-2 border bg-gray-50 hover:bg-gray-100"
+                  onClick={() => handleSelectAnswer(a.key)}
                 >
-                  {selected && (
-                    <span className="w-3 h-3 bg-blue-600 rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></span>
-                  )}
-                </span>
-                <span className="text-gray-800">{a.answer}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+                  <span
+                    className={`w-4 h-4 rounded-full border relative ${
+                      selected ? "border-blue-600" : "border-gray-300"
+                    }`}
+                  >
+                    {selected && (
+                      <span className="w-3 h-3 bg-blue-600 rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></span>
+                    )}
+                  </span>
+                  <span>{a.answer}</span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      ) : (
+        <Result
+          result={
+            results ||
+            JSON.parse(localStorage.getItem("exam-results") || "null")
+          }
+        />
+      )}
 
-      {/* back Navigation */}
-      <div className="grid grid-cols-10 xl:grid-cols-11 items-center gap-2">
+      {/* Navigation & Timer */}
+      <div
+        className={`grid ${
+          isFinished ? "grid-cols-12" : "grid-cols-10 xl:grid-cols-11"
+        } gap-2 items-center`}
+      >
         <Button
-          variant={"secondary"}
-          className="col-span-4 xl:col-span-5"
-          onClick={handlePrevious}
-          disabled={currentQuestionIndex === 0}
+          variant="secondary"
+          className={`${
+            isFinished
+              ? "col-span-12 xl:col-span-6"
+              : "col-span-4 xl:col-span-5"
+          }`}
+          disabled={isFinished ? false : currentQuestionIndex === 0}
+          onClick={isFinished ? handleRestart : handlePrevious}
         >
-          <ChevronLeft /> Previous
+          {isFinished ? (
+            <>
+              <RotateCcw size={18} /> Restart
+            </>
+          ) : (
+            <>
+              <ChevronLeft /> Previous
+            </>
+          )}
         </Button>
 
-        {/* Timer */}
-        <div className="col-span-2 xl:col-span-1 flex justify-center items-center">
+        <div
+          className={`col-span-2 xl:col-span-1 flex justify-center ${
+            isFinished ? "hidden" : ""
+          }`}
+        >
           <div
-            className="relative w-[50px] h-[50px] xl:w-[60px] xl:h-[60px] rounded-full flex justify-center items-center"
+            className="relative w-[50px] h-[50px] rounded-full flex justify-center items-center"
             style={{
               background: `conic-gradient(#e0f2fe ${progressDeg}deg, #2563eb 0deg)`,
             }}
           >
-            <div className="w-[40px] h-[40px] xl:w-[40px] xl:h-[40px] rounded-full bg-white flex justify-center items-center">
-              <span className="font-bold text-blue-600 text-xs">
+            <div className="w-[40px] h-[40px] rounded-full bg-white flex justify-center items-center">
+              <span className="text-xs font-bold text-blue-600">
                 {formatTime(timeLeft)}
               </span>
             </div>
           </div>
         </div>
-        {/* next navigation */}
-        {currentQuestionIndex === totalQuestions - 1 ? (
-          <Button className="col-span-4 xl:col-span-5" onClick={handleFinish}>
-            Finish
-          </Button>
-        ) : (
-          <Button className="col-span-4 xl:col-span-5" onClick={handleNext}>
-            Next <ChevronRight />
-          </Button>
-        )}
+
+        <Button
+          className={`${
+            isFinished
+              ? "col-span-12 xl:col-span-6"
+              : "col-span-4 xl:col-span-5"
+          }`}
+          onClick={
+            isFinished
+              ? handleExplore
+              : currentQuestionIndex === totalQuestions - 1
+              ? handleFinish
+              : handleNext
+          }
+          disabled={isPending}
+        >
+          {isFinished ? (
+            <>
+              Explore <FolderSearch size={18} />
+            </>
+          ) : currentQuestionIndex === totalQuestions - 1 ? (
+            isPending ? (
+              "Finishing..."
+            ) : (
+              "Finish"
+            )
+          ) : (
+            <>
+              Next <ChevronRight />
+            </>
+          )}
+        </Button>
       </div>
     </section>
   );
