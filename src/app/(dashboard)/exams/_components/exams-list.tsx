@@ -5,7 +5,7 @@ import Loading from "../../loading";
 import useExams from "../_hooks/use-exams";
 import Link from "next/link";
 import { ROUTES } from "@/lib/constants/routes";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { ExamNameContext } from "@/components/providers/app/components/exam-name-context";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -16,6 +16,16 @@ export default function ExamsList() {
   const { setExamName } = useContext(ExamNameContext);
 
   const { data: exams, isLoading, error } = useExams();
+
+  // remove all saved local storage data when the component unmounts
+  useEffect(() => {
+    const localStorageKeys = Object.keys(localStorage);
+    localStorageKeys.forEach((key) => {
+      if (key.startsWith("exam-") || key.startsWith("time-")) {
+        localStorage.removeItem(key);
+      }
+    });
+  }, []);
 
   if (error)
     return (
@@ -34,7 +44,7 @@ export default function ExamsList() {
             href={ROUTES.EXAM_QUESTIONS.replace(":id", exam._id)}
             onClick={() => setExamName(exam?.title)}
             key={exam._id}
-            className="p-4 flex items-center justify-between bg-blue-50 hover:bg-blue-100 transition-colors duration-300 cursor-pointer"
+            className="p-4 flex items-center justify-between bg-blue-50 hover:bg-blue-100 transition-colors duration-300 cursor-pointer active:scale-90"
           >
             <div className="flex flex-col gap-1">
               <p className="text-blue-600 fw-semibold text-xs md:text-base xl:text-xl">

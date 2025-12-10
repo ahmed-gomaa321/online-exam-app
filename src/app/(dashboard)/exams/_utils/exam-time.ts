@@ -1,14 +1,14 @@
 type ExamTime = {
-  savedTime: string | null;
-  savedtartTime: string | null;
+  duration: number;
+  startTime: string | null;
 };
 
-export function getRemainingTime({ savedTime, savedtartTime }: ExamTime) {
-  if (!savedTime || !savedtartTime) return 0;
+export function getRemainingTime({ duration, startTime }: ExamTime) {
+  if (!startTime) return duration;
 
   const now = Date.now();
-  const diff = Math.floor((now - parseInt(savedtartTime)) / 1000);
-  const remainingTime = parseInt(savedTime) - diff;
+  const diff = Math.floor((now - parseInt(startTime)) / 1000);
+  const remaining = duration - diff;
 
-  return remainingTime > 0 ? remainingTime : 0;
+  return remaining > 0 ? remaining : 0;
 }

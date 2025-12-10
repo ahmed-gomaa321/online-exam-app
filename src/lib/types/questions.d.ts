@@ -5,7 +5,7 @@ export interface QuestionAnswer {
 
 export interface UserAnswer {
   questionId: string;
-  correct: string;
+  correct?: string;
 }
 
 export interface ExamInfo {
