@@ -200,7 +200,8 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
 
   if (isLoading) return <Loading />;
   if (error) return <p>Error: {error.message}</p>;
-  if (!questions?.questions.length) return <p>No questions found.</p>;
+  if (!questions?.questions.length)
+    return <p className="bg-white p-6 text-gray-800 text-center">Sorry, No questions found.</p>;
 
   const progress = totalQuestions
     ? ((isFinished ? totalQuestions : currentQuestionIndex + 1) /
