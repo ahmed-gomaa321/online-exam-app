@@ -89,6 +89,11 @@
 ::-webkit-scrollbar {
   width: 6px;
 }
+@media screen and (max-width: 500px) {
+  ::-webkit-scrollbar {
+    height: 5px;;
+  }
+}
 
 ::-webkit-scrollbar-track {
   background: #f1f1f1;
@@ -96,7 +101,7 @@
 
 ::-webkit-scrollbar-thumb {
   background: #2563eb;
-  border-radius: 4px;
+  border-radius: 0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
