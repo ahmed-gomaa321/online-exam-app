@@ -32,7 +32,7 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
   const [answers, setAnswers] = useState<UserAnswer[]>([]);
   const [timeLeft, setTimeLeft] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
-  const [isInitialLoad, setIsInitialLoad] = useState(true); 
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   const totalQuestions = questions?.questions.length ?? 0;
   const currentQuestion = questions?.questions[currentQuestionIndex] ?? null;
@@ -249,11 +249,11 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
               return (
                 <button
                   key={a.key}
-                  className="p-4 flex gap-2 border bg-gray-50 hover:bg-gray-100"
+                  className="p-2 xl:p-4 grid grid-cols-12 xl:flex items-center gap-2 border bg-gray-50 hover:bg-gray-100"
                   onClick={() => handleSelectAnswer(a.key)}
                 >
                   <span
-                    className={`w-4 h-4 rounded-full border relative ${
+                    className={`w-4 h-4 col-span-1 rounded-full border relative ${
                       selected ? "border-blue-600" : "border-gray-300"
                     }`}
                   >
@@ -261,7 +261,9 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
                       <span className="w-3 h-3 bg-blue-600 rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></span>
                     )}
                   </span>
-                  <span>{a.answer}</span>
+                  <span className="col-span-11 text-xs xl:text-base overflow-auto text-start">
+                    {a.answer}
+                  </span>
                 </button>
               );
             })}
@@ -339,7 +341,7 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
         >
           {isFinished ? (
             <>
-              Explore <FolderSearch size={18} />
+              <FolderSearch size={18} /> Explore
             </>
           ) : currentQuestionIndex === totalQuestions - 1 ? (
             isPending ? (
