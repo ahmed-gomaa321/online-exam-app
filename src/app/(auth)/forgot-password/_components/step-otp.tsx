@@ -10,7 +10,6 @@ import {
 import useVerifyOtp from "../_hooks/use-verify-otp";
 import { verifyOtpSchema } from "@/lib/schemes/auth.schemes";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
 import { ROUTES } from "@/lib/constants/routes";
 import { MoveLeft, MoveRight } from "lucide-react";
 import { Form } from "@/components/ui/form";
@@ -21,7 +20,6 @@ import {
 } from "@/components/ui/input-otp";
 import { UseMutateFunction } from "@tanstack/react-query";
 import {
-  clearSavedEmail,
   clearSavedStep,
   getOtpTimeLeft,
   getSavedEmail,
@@ -87,7 +85,7 @@ export default function StepOtp({
           onError: (err) => {
             form.setError("resetCode", { message: err.message });
           },
-        }
+        },
       );
     } else {
       form.clearErrors("resetCode");
@@ -102,7 +100,7 @@ export default function StepOtp({
           startOtpTimer();
           setTimer(getOtpTimeLeft());
         },
-      }
+      },
     );
   };
 
@@ -135,7 +133,7 @@ export default function StepOtp({
             </p>
           </div>
           <div className="flex items-center gap-1 leading-none">
-            <p>user@example.com.</p>
+            <p>{email ?? "user@example.com."}</p>
             <span
               onClick={() => setStep(1)}
               className="text-blue-600 hover:text-blue-700 transition cursor-pointer active:scale-90"
