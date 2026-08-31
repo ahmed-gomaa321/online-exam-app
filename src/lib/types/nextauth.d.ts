@@ -2,17 +2,20 @@ import { User } from "next-auth";
 
 declare module "next-auth" {
   interface User {
-    accessToken: string;
+    token: string;
     user: {
-      _id: string;
+      id: string;
       username: string;
-      firstName: string;
-      lastName: string;
       email: string;
       phone: string;
+      firstName: string;
+      lastName: string;
+      profilePhoto: string;
+      emailVerified: boolean;
+      phoneVerified: boolean;
       role: string;
-      isVerified: boolean;
       createdAt: string;
+      updatedAt: string;
     };
   }
   /**

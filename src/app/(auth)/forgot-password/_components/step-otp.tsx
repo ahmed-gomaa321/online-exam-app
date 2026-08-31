@@ -8,7 +8,6 @@ import {
   VerifyOtpFields,
 } from "@/lib/types/auth-types/forgot-password";
 import useVerifyOtp from "../_hooks/use-verify-otp";
-import { verifyOtpSchema } from "@/lib/schemes/auth.schemes";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ROUTES } from "@/lib/constants/routes";
 import { MoveLeft, MoveRight } from "lucide-react";
@@ -28,6 +27,7 @@ import {
 import FormFooter from "../../_components/form-footer";
 import ErrorAlert from "../../_components/error-alert";
 import { useEffect } from "react";
+import { verifyOtpSchema } from "@/lib/schemes/auth.schemes";
 
 type StepOtpProps = {
   timer: number;

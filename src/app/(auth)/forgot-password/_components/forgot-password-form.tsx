@@ -5,7 +5,7 @@ import StepEmail from "./step-email";
 import StepOtp from "./step-otp";
 import StepResetPassword from "./step-reset-password";
 import useSendEmail from "../_hooks/use-send-email";
-import { getOtpTimeLeft, saveStep } from "../_utils/otp-timer-presisted";
+import { getOtpTimeLeft } from "../_utils/otp-timer-presisted";
 
 export default function ForgotPasswordForm() {
   const [step, setStep] = useState(1);
@@ -16,7 +16,6 @@ export default function ForgotPasswordForm() {
 
   const setStepState = (newStep: number) => {
     setStep(newStep);
-    saveStep(newStep);
   };
 
   const renderStep = () => {

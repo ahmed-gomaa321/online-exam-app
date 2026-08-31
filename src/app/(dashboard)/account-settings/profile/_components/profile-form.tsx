@@ -16,7 +16,7 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { ProfileFormFields } from "@/lib/types/account-settings-types/edit-profile";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { editProfileSchema } from "@/lib/schemes/account-settings.schemes";
+import { editProfileSchema } from "@/lib/schemas/account-settings.schemes";
 import useEditProfile from "../../_hooks/use-edit-profile";
 import { toast } from "sonner";
 import ErrorAlert from "@/app/(auth)/_components/error-alert";
@@ -56,7 +56,7 @@ export default function ProfileForm() {
 
   // Display phone formatted for user
   const [displayPhone, setDisplayPhone] = useState<string>(
-    session?.user?.phone ? "+20" + session.user.phone.replace(/^0/, "") : ""
+    session?.user?.phone ? "+20" + session.user.phone.replace(/^0/, "") : "",
   );
 
   // Reset form when session changes

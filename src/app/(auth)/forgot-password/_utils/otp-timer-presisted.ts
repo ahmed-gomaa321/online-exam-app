@@ -17,18 +17,6 @@ export const getOtpTimeLeft = () => {
   return diff > 0 ? diff : 0;
 };
 
-export const saveStep = (step: number) => {
-  if (typeof window === "undefined") return;
-  localStorage.setItem("forgot_password_step", step.toString());
-};
-
-export const getSavedStep = (): number => {
-  if (typeof window === "undefined") return 1;
-
-  const step = localStorage.getItem("forgot_password_step");
-  return step ? +step : 1;
-};
-
 export const saveEmail = (email: string) => {
   if (typeof window === "undefined") return;
   localStorage.setItem("email", email);
@@ -44,7 +32,7 @@ export const clearSavedEmail = () => {
   localStorage.removeItem("email");
 };
 
-export const clearSavedStep = () => {
+export const clearOtpTimer = () => {
   if (typeof window === "undefined") return;
-  localStorage.removeItem("forgot_password_step");
+  localStorage.removeItem("otp_time");
 };

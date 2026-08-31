@@ -24,7 +24,7 @@ export const authOptions: AuthOptions = {
           throw new Error(payload.message);
         }
         return {
-          id: payload.user._id,
+          id: payload.user.id,
           accessToken: payload.token,
           user: payload.user,
         };
