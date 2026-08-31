@@ -14,7 +14,7 @@ export default function FormFooter({
   linkHref,
 }: FormFooterProps) {
   return (
-    <div className="font-medium flex items-center gap-1 text-sm">
+    <div className="font-medium flex items-center justify-center gap-1 text-sm">
       <p className="text-gray-500">{text}</p>
       <Link
         href={linkHref}

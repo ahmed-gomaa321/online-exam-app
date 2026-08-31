@@ -29,7 +29,7 @@ export default function LoginForm() {
   const form = useForm<LoginFields>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
+      username: "",
       password: "",
     },
   });
@@ -51,18 +51,18 @@ export default function LoginForm() {
           className="p-8 w-full max-w-md flex flex-col gap-y-4"
         >
           <h2 className="font-bold text-3xl font-inter">Login</h2>
-          {/* Email field */}
+          {/* username field */}
           <FormField
             control={form.control}
-            name="email"
+            name="username"
             render={({ field }) => (
               <FormItem className="flex flex-col gap-2">
-                <FormLabel>Email</FormLabel>
+                <FormLabel>username</FormLabel>
                 <FormControl>
                   <Input
-                    error={!!form.formState.errors.email}
+                    error={!!form.formState.errors.username}
                     {...field}
-                    placeholder="user@example.com"
+                    placeholder="username"
                   />
                 </FormControl>
                 <FormMessage />
@@ -92,7 +92,7 @@ export default function LoginForm() {
               </FormItem>
             )}
           />
-          {error && <ErrorAlert message={"wrong email or password"} />}
+          {error && <ErrorAlert message={"wrong username or password"} />}
 
           <Button
             type="submit"

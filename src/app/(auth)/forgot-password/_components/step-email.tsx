@@ -1,6 +1,5 @@
 "use client";
 
-import { sendEmailSchema } from "@/lib/schemes/auth.schemes";
 import {
   ForgotPasswordFields,
   SendEmailResponse,
@@ -23,6 +22,7 @@ import { UseMutateFunction } from "@tanstack/react-query";
 import { saveEmail, startOtpTimer } from "../_utils/otp-timer-presisted";
 import FormFooter from "../../_components/form-footer";
 import ErrorAlert from "../../_components/error-alert";
+import { sendEmailSchema } from "@/lib/schemes/auth.schemes";
 
 type StepEmailProps = {
   setStep: (step: number) => void;

@@ -8,7 +8,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { changePasswordSchema } from "@/lib/schemes/change-password.schemes";
+import { changePasswordSchema } from "@/lib/schemas/change-password.schemes";
 import { changePasswordFiels } from "@/lib/types/account-settings-types/change-password";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -46,12 +46,12 @@ export default function ChangePasswordForm() {
 
       onError: (err) => {
         toast.dismiss();
-        toast.error(
+        (toast.error(
           err.message === "old password incorrect"
             ? err.message
-            : "Something went wrong"
+            : "Something went wrong",
         ),
-          form.setError("root", { message: err.message, type: "server" });
+          form.setError("root", { message: err.message, type: "server" }));
       },
     });
   };
