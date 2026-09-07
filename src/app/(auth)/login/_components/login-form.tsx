@@ -110,8 +110,7 @@ export default function LoginForm() {
           </Link>
         </FieldGroup>
 
-        {/* {error && <ErrorAlert message={"wrong username or password"} />} */}
-        {error && <ErrorAlert message={error?.message} />}
+        {error && <ErrorAlert message={"wrong username or password"} />}
 
         <Button
           type="submit"
