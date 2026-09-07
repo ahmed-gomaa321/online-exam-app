@@ -20,11 +20,13 @@ import {
   clearOtpTimer,
   clearSavedEmail,
 } from "../../forgot-password/_utils/otp-timer-presisted";
+import ErrorAlert from "../../_components/error-alert";
 
 export default function PasswordStep() {
   const router = useRouter();
-  const { isPending, register } = useRegister();
+  const { isPending, register, error } = useRegister();
 
+  // unique ids for accessibility
   const formTitleId = useId();
   const passwordId = useId();
   const confirmPasswordId = useId();
@@ -61,8 +63,8 @@ export default function PasswordStep() {
   }, [form]);
 
   const onSubmit = (data: RegisterFormData) => {
-    console.log("form data:" ,data);
-    
+    console.log("form data:", data);
+
     register(data, {
       onSuccess: (res) => {
         toast.success(res.message || "Successfully registered, please login");
@@ -72,6 +74,7 @@ export default function PasswordStep() {
         router.replace(ROUTES.LOGIN);
       },
       onError: (err) => {
+        form.setError("root", { message: err.message, type: "server" });
         toast.error(err?.message || "Something went wrong");
       },
     });
@@ -144,6 +147,8 @@ export default function PasswordStep() {
             )}
           />
         </FieldGroup>
+
+        {error && <ErrorAlert message={error.message} />}
 
         <div className="flex items-center gap-3 w-full">
           <Button

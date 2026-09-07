@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
   const res = await fetch(`${process.env.NEXT_API_BASE}/exams`, {
     headers: {
       "Content-Type": "application/json",
-      token: token.accessToken,
+      token: token.token,
     },
   });
   try {

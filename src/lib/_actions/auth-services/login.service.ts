@@ -3,7 +3,7 @@ import { LoginPayload } from "@/lib/types/auth";
 import { LoginFields } from "@/lib/types/auth-types/login";
 
 export default async function LoginService(data: LoginFields) {
-  const res = await fetch(`${process.env.NEXT_API_BASE}/auth/signin`, {
+  const res = await fetch(`${process.env.NEXT_API_BASE}/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

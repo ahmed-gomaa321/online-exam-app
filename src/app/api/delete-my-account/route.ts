@@ -15,7 +15,7 @@ export async function DELETE(req: NextRequest) {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
-      token: token.accessToken,
+      token: token.token,
     },
   });
   const data = await res.json();

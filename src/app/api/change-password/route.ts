@@ -8,7 +8,9 @@ export async function PATCH(req: NextRequest) {
     secureCookie: process.env.NODE_ENV === "production",
   });
 
-  if (!token?.accessToken) {
+  const accessToken = typeof token?.token === "string" ? token.token : null;
+
+  if (!accessToken) {
     return new Response("Unauthorized", { status: 401 });
   }
 
@@ -21,10 +23,10 @@ export async function PATCH(req: NextRequest) {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          token: token.accessToken,
+          token: accessToken,
         },
         body: JSON.stringify(body),
-      }
+      },
     );
 
     const text = await res.text();
@@ -41,7 +43,7 @@ export async function PATCH(req: NextRequest) {
     console.error("Change password failed:", error);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

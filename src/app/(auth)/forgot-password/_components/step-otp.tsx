@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/input-otp";
 import { UseMutateFunction } from "@tanstack/react-query";
 import {
-  clearSavedStep,
   getOtpTimeLeft,
   getSavedEmail,
   startOtpTimer,
@@ -64,7 +63,6 @@ export default function StepOtp({
       onSuccess: () => {
         localStorage.removeItem("otp_time");
         setStep(3);
-        clearSavedStep();
       },
       onError: (err) => {
         form.setError("resetCode", { message: err.message });
@@ -80,7 +78,6 @@ export default function StepOtp({
           onSuccess: () => {
             localStorage.removeItem("otp_time");
             setStep(3);
-            clearSavedStep();
           },
           onError: (err) => {
             form.setError("resetCode", { message: err.message });

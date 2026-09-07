@@ -7,26 +7,34 @@ export const authOptions: AuthOptions = {
     Credentials({
       name: "Credentials",
       credentials: {
-        email: {},
+        username: {},
         password: {},
       },
       authorize: async (
-        credentials: { email: string; password: string } | undefined
+        credentials: { username: string; password: string } | undefined,
       ) => {
         if (!credentials) {
           throw new Error("please enter valid credentials.");
         }
-        const payload = await LoginService({
-          email: credentials.email,
+        const response = await LoginService({
+          username: credentials.username,
           password: credentials.password,
         });
-        if ("code" in payload) {
-          throw new Error(payload.message);
+
+        if (!response.status) {
+          throw new Error(response.message || "Failed to authenticate");
         }
+
+        const authData = response?.payload;
+
+        if (!authData?.user || !authData?.token) {
+          throw new Error("Invalid payload structure");
+        }
+
         return {
-          id: payload.user.id,
-          accessToken: payload.token,
-          user: payload.user,
+          id: authData.user.id,
+          token: authData.token,
+          user: authData.user,
         };
       },
     }),
@@ -34,7 +42,7 @@ export const authOptions: AuthOptions = {
   callbacks: {
     jwt: ({ token, user, session, trigger }) => {
       if (user) {
-        token.accessToken = user.accessToken;
+        token.token = user.token;
         token.user = user.user;
       }
 
@@ -46,7 +54,7 @@ export const authOptions: AuthOptions = {
       }
 
       if (trigger === "update" && session?.accessToken) {
-        token.accessToken = session.accessToken;
+        token.token = session.accessToken;
       }
       return token;
     },

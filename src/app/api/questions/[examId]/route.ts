@@ -23,7 +23,7 @@ export async function GET(
       {
         headers: {
           "Content-Type": "application/json",
-          token: token.accessToken,
+          token: token.token,
         },
       }
     );

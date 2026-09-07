@@ -9,7 +9,7 @@ export default function useLogin() {
     mutationFn: async (data: LoginFields) => {
       const res = await signIn("credentials", {
         redirect: false,
-        email: data.email,
+        username: data.username,
         password: data.password,
       });
       if (!res?.ok) {

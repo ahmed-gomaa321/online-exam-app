@@ -1,28 +1,31 @@
 "use client";
 
-import { CircleX, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useLogin from "../_hooks/use-login";
 import { LoginFields } from "@/lib/types/auth-types/login";
-import Link from "next/link";
 import { ROUTES } from "@/lib/constants/routes";
 import { loginSchema } from "@/lib/schemes/auth.schemes";
 import { PasswordInput } from "@/components/shared/password-input";
 import FormFooter from "../../_components/form-footer";
 import ErrorAlert from "../../_components/error-alert";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { useId } from "react";
+import Link from "next/link";
 
 export default function LoginForm() {
+  // unique ids for accessibility
+  const formTitleId = useId();
+  const usernameId = useId();
+  const passwordId = useId();
+
   // hooks
   const { login, isPending, error } = useLogin();
   //  react hook form
@@ -45,64 +48,79 @@ export default function LoginForm() {
 
   return (
     <section className="min-h-screen flex flex-col items-center justify-center">
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="p-8 w-full max-w-md flex flex-col gap-y-4"
-        >
-          <h2 className="font-bold text-3xl font-inter">Login</h2>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        aria-labelledby={formTitleId}
+        noValidate
+        className="p-8 w-full max-w-md flex flex-col gap-y-4"
+      >
+        <h1 id={formTitleId} className="font-bold text-3xl font-inter">
+          Login
+        </h1>
+        <FieldGroup>
           {/* username field */}
-          <FormField
-            control={form.control}
+          <Controller
             name="username"
-            render={({ field }) => (
-              <FormItem className="flex flex-col gap-2">
-                <FormLabel>username</FormLabel>
-                <FormControl>
-                  <Input
-                    error={!!form.formState.errors.username}
-                    {...field}
-                    placeholder="username"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={usernameId}>Username</FieldLabel>
+                <Input
+                  {...field}
+                  autoFocus
+                  ref={field.ref}
+                  id={usernameId}
+                  type="text"
+                  aria-invalid={fieldState.invalid}
+                  placeholder="User123"
+                  autoComplete="username"
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
             )}
           />
 
           {/* Password field */}
-          <FormField
-            control={form.control}
+          <Controller
             name="password"
-            render={({ field }) => (
-              <FormItem className="flex flex-col gap-2">
-                <FormLabel>Password</FormLabel>
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={passwordId}>Password</FieldLabel>
                 <PasswordInput
-                  error={!!form.formState.errors.password}
                   {...field}
+                  id={passwordId}
+                  autoComplete="new-password"
                   placeholder="********"
+                  aria-invalid={fieldState.invalid}
                 />
-                <FormMessage />
-                <Link
-                  href={ROUTES.FORGOT_PASSWORD}
-                  className="text-blue-600 hover:text-blue-700 transition text-sm font-medium cursor-pointer self-end tracking-normal active:scale-90"
-                >
-                  Forgot your password?
-                </Link>
-              </FormItem>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} aria-live="polite" />
+                )}
+              </Field>
             )}
           />
-          {error && <ErrorAlert message={"wrong username or password"} />}
-
-          <Button
-            type="submit"
-            disabled={isPending}
-            className={`mt-4 w-full font-medium py-2`}
+          <Link
+            className="ms-auto text-blue-500 hover:text-blue-600 font-medium text-sm"
+            href={ROUTES.FORGOT_PASSWORD}
           >
-            {isPending ? "Logging in..." : "Login"}
-          </Button>
-        </form>
-      </Form>
+            Forgot your password?
+          </Link>
+        </FieldGroup>
+
+        {/* {error && <ErrorAlert message={"wrong username or password"} />} */}
+        {error && <ErrorAlert message={error?.message} />}
+
+        <Button
+          type="submit"
+          disabled={isPending}
+          className={`mt-4 w-full font-medium py-2`}
+        >
+          {isPending ? "Logging in..." : "Login"}
+        </Button>
+      </form>
       <FormFooter
         text="Don't have an account?"
         linkText="create yours"
