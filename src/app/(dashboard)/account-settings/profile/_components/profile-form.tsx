@@ -16,12 +16,12 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { ProfileFormFields } from "@/lib/types/account-settings-types/edit-profile";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { editProfileSchema } from "@/lib/schemas/account-settings.schemes";
 import useEditProfile from "../../_hooks/use-edit-profile";
 import { toast } from "sonner";
 import ErrorAlert from "@/app/(auth)/_components/error-alert";
 import ConfirmModal from "@/components/shared/confirm-modal";
 import useDeleteMyAccount from "../../_hooks/use-delete-my-account";
+import { editProfileSchema } from "@/lib/schemes/account-settings.schemes";
 
 export default function ProfileForm() {
   // state

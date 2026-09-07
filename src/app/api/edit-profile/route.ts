@@ -16,7 +16,7 @@ export async function PUT(req: NextRequest) {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      token: token.accessToken,
+      token: token.token,
     },
     body: JSON.stringify(body),
   });

@@ -3,7 +3,7 @@ import { ResetPasswordFields } from "@/lib/types/auth-types/forgot-password";
 import useResetPassword from "../_hooks/use-reset-password";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { resetPasswordSchema } from "@/lib/schemas/auth.schemes";
+import { resetPasswordSchema } from "@/lib/schemes/auth.schemes";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "@/lib/constants/routes";
 import { toast } from "sonner";

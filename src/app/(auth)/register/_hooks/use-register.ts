@@ -2,7 +2,6 @@
 
 import { RegisterFields } from "@/lib/types/auth-types/register";
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import RegisterService, {
   confirmEmailVerification,
   emailVerificationService,
@@ -42,7 +41,6 @@ export function useconfirmVerifyEmail() {
 
 // register hook
 export default function useRegister() {
-  const router = useRouter();
   const { isPending, error, mutate } = useMutation({
     mutationFn: async (data: RegisterFields) => {
       const payload = await RegisterService(data);

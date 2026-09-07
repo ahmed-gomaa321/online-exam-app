@@ -8,7 +8,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { changePasswordSchema } from "@/lib/schemas/change-password.schemes";
 import { changePasswordFiels } from "@/lib/types/account-settings-types/change-password";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -16,6 +15,7 @@ import useChangePassword from "../../_hooks/use-change-password";
 import { toast } from "sonner";
 import ErrorAlert from "@/app/(auth)/_components/error-alert";
 import { useSession } from "next-auth/react";
+import { changePasswordSchema } from "@/lib/schemes/change-password.schemes";
 
 export default function ChangePasswordForm() {
   const { update } = useSession();

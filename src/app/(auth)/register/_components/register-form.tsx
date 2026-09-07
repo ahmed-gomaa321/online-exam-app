@@ -61,7 +61,7 @@ export default function RegisterForm() {
   };
 
   return (
-    <section className="w-full md:w-3/4 flex flex-col items-center justify-center">
+    <section className="w-full md:w-3/4 flex flex-col items-center justify-center pt-4">
       {/* Dynamic Progress Bar */}
       <Stepper currentStep={currentStep} totalSteps={totalSteps} />
       {/* Render the current step */}

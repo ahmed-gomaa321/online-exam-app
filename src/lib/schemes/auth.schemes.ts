@@ -4,12 +4,7 @@ import { email, z } from "zod";
 
 // login scheme
 export const loginSchema = z.object({
-  email: z
-    .string()
-    .refine((val) => val.length > 0, { message: "Please enter your email" })
-    .refine((val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
-      message: "Please enter a valid email",
-    }),
+  username: z.string().min(2, "Username must be at least 2 characters"),
   password: z.string().nonempty("please enter your password"),
 });
 
