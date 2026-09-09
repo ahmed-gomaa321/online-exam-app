@@ -115,7 +115,9 @@ export type personInfoData = z.infer<typeof registerStep3Schema>;
 export type passData = z.infer<typeof registerStep4Schema>;
 export type RegisterFormData = z.infer<typeof registerSchema>;
 // ---------------------------------------------------------------------------
+
 // forgot password scheme
+
 // send email scheme
 export const sendEmailSchema = z.object({
   email: z
@@ -124,6 +126,7 @@ export const sendEmailSchema = z.object({
     .refine((val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
       message: "Please enter a valid email",
     }),
+  redirectUrl: z.string(),
 });
 // verify otp scheme
 export const verifyOtpSchema = z.object({
@@ -135,12 +138,7 @@ export const verifyOtpSchema = z.object({
 // reset password scheme
 export const resetPasswordSchema = z
   .object({
-    email: z
-      .string()
-      .refine((val) => val.length > 0, { message: "Please enter your email" })
-      .refine((val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
-        message: "Please enter a valid email",
-      }),
+    token: z.string().optional(),
     newPassword: z
       .string()
       .nonempty("please enter your password")
@@ -149,9 +147,9 @@ export const resetPasswordSchema = z
         message:
           "Password must include uppercase, lowercase, number, and special character",
       }),
-    confirmNewPassword: z.string().optional(),
+    confirmPassword: z.string().min(1, { message: "Please confirm your password" }),
   })
-  .refine((data) => data.newPassword === data.confirmNewPassword, {
-    path: ["confirmNewPassword"],
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    path: ["confirmPassword"],
     message: "Passwords do not match",
   });

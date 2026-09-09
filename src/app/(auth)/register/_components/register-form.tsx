@@ -5,7 +5,7 @@ import ConfirmEmailVerification from "./confirm-email-verification";
 import EmailVerification from "./email-verification";
 import PasswordForm from "./password-form";
 import PersonalInfo from "./personal-info";
-import { getOtpTimeLeft } from "../../forgot-password/_utils/otp-timer-presisted";
+import { getOtpTimeLeft } from "../../../../lib/utils/otp-timer-presisted";
 import Stepper from "./stepper";
 import { useverifyEmail } from "../_hooks/use-register";
 

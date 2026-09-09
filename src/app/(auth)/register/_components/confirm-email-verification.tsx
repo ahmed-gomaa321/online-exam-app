@@ -17,7 +17,7 @@ import {
   getOtpTimeLeft,
   getSavedEmail,
   startOtpTimer,
-} from "../../forgot-password/_utils/otp-timer-presisted";
+} from "../../../../lib/utils/otp-timer-presisted";
 import { useconfirmVerifyEmail } from "../_hooks/use-register";
 import { toast } from "sonner";
 import ErrorAlert from "../../_components/error-alert";

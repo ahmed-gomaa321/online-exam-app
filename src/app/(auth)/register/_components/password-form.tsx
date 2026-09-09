@@ -19,7 +19,7 @@ import { ROUTES } from "@/lib/constants/routes";
 import {
   clearOtpTimer,
   clearSavedEmail,
-} from "../../forgot-password/_utils/otp-timer-presisted";
+} from "../../../../lib/utils/otp-timer-presisted";
 import ErrorAlert from "../../_components/error-alert";
 
 export default function PasswordStep() {

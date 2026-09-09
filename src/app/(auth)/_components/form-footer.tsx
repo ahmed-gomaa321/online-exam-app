@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 type FormFooterProps = {
+  className?: string;
   text: string;
   linkText: string;
   linkHref: string;
@@ -12,9 +13,12 @@ export default function FormFooter({
   text,
   linkText,
   linkHref,
+  className,
 }: FormFooterProps) {
   return (
-    <div className="font-medium flex items-center justify-center gap-1 text-sm">
+    <div
+      className={`font-medium flex items-center justify-center gap-1 text-xs sm:text-sm ${className || ""}`}
+    >
       <p className="text-gray-500">{text}</p>
       <Link
         href={linkHref}

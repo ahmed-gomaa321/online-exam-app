@@ -8,7 +8,7 @@ export default function useResetPassword() {
   const { isPending, error, mutate } = useMutation({
     mutationFn: async (data: ResetPasswordFields) => {
       const res = await resetPassword(data);
-      if ("code" in res) {
+      if (res.status === false) {
         throw new Error(res.message);
       }
       return res;

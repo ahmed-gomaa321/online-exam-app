@@ -1,113 +1,122 @@
 "use client";
 
-import {
-  ForgotPasswordFields,
-  SendEmailResponse,
-} from "@/lib/types/auth-types/forgot-password";
+import { ForgotPasswordFields } from "@/lib/types/auth-types/forgot-password";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Controller, useForm } from "react-hook-form";
+import { FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { MoveRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { ROUTES } from "@/lib/constants/routes";
-import { UseMutateFunction } from "@tanstack/react-query";
-import { saveEmail, startOtpTimer } from "../_utils/otp-timer-presisted";
+import { saveEmail } from "../../../../lib/utils/otp-timer-presisted";
 import FormFooter from "../../_components/form-footer";
 import ErrorAlert from "../../_components/error-alert";
 import { sendEmailSchema } from "@/lib/schemes/auth.schemes";
+import useSendEmail from "../_hooks/use-send-email";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { useId } from "react";
 
 type StepEmailProps = {
   setStep: (step: number) => void;
-  sendEmail: UseMutateFunction<
-    SendEmailResponse,
-    Error,
-    ForgotPasswordFields,
-    unknown
-  >;
-  isPending: boolean;
-  error: Error | null;
 };
 
-export default function StepEmail({
-  setStep,
-  sendEmail,
-  isPending,
-  error,
-}: StepEmailProps) {
+export default function StepEmail({ setStep }: StepEmailProps) {
+  // hooks
+  const { sendEmail, isPending, error } = useSendEmail();
+
+  // unique ids for accessibility
+  const formTitleId = useId();
+  const emailId = useId();
+
   // react hook form
   const form = useForm<ForgotPasswordFields>({
     defaultValues: {
       email: "",
+      redirectUrl: "",
     },
     resolver: zodResolver(sendEmailSchema),
   });
   const onSubmit = (data: ForgotPasswordFields) => {
-    sendEmail(data, {
-      onSuccess: () => {
-        saveEmail(data?.email);
-        startOtpTimer();
-        setStep(2);
+    sendEmail(
+      {
+        ...data,
+        redirectUrl: `${window.location.origin}${ROUTES.FORGOT_PASSWORD}`,
       },
-      onError: (err) => {
-        form.setError("root", { message: err.message, type: "server" });
+      {
+        onSuccess: () => {
+          saveEmail(data?.email);
+          setStep(2);
+        },
+        onError: (err) => {
+          form.setError("root", { message: err.message, type: "server" });
+        },
       },
-    });
+    );
   };
   return (
     <section className="w-full flex flex-col items-center justify-center">
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="p-8 w-full flex flex-col gap-y-4"
-        >
-          <h2 className="font-bold text-3xl font-inter">Forgot Password</h2>
-          <p className="text-gray-500 mt-2 mb-4">
-            Don’t worry, we will help you recover your account.
-          </p>
-          {/* Email field */}
-          <FormField
-            control={form.control}
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        aria-labelledby={formTitleId}
+        noValidate
+        className="p-8 w-full flex flex-col gap-y-4"
+      >
+        <h2 id={formTitleId} className="font-bold text-3xl font-inter">
+          Forgot Password
+        </h2>
+        <p className="text-gray-500 mt-2 mb-4">
+          Don’t worry, we will help you recover your account.
+        </p>
+        {/* Email field */}
+        <FieldGroup>
+          <Controller
             name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="font-inter">Email</FormLabel>
-                <FormControl>
-                  <Input
-                    error={!!error?.message}
-                    {...field}
-                    placeholder="user@example.com"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel className="font-inter" htmlFor={emailId}>
+                  Email
+                </FieldLabel>
+                <Input
+                  {...field}
+                  autoFocus
+                  ref={field.ref}
+                  id={emailId}
+                  type="email"
+                  aria-invalid={fieldState.invalid}
+                  placeholder="user@example.com"
+                  autoComplete="email"
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
             )}
           />
-          {error && <ErrorAlert message={error.message} />}
+        </FieldGroup>
 
-          {/* Submit button */}
-          <Button
-            type="submit"
-            disabled={isPending}
-            className="w-full mt-4 flex items-center justify-center gap-x-2"
-          >
-            {isPending ? (
-              "Sending..."
-            ) : (
-              <>
-                Continue <MoveRight />
-              </>
-            )}
-          </Button>
-        </form>
-      </Form>
+        {error && <ErrorAlert message={error.message} />}
+
+        {/* Submit button */}
+        <Button
+          type="submit"
+          disabled={isPending || form.formState.isSubmitting}
+          className="w-full mt-4 flex items-center justify-center gap-x-2"
+        >
+          {isPending || form.formState.isSubmitting ? (
+            "Sending..."
+          ) : (
+            <>
+              Next <ChevronRight />
+            </>
+          )}
+        </Button>
+      </form>
       <FormFooter
         text="Don't have an account?"
         linkText="create yours"

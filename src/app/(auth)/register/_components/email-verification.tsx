@@ -20,7 +20,7 @@ import { ChevronRight } from "lucide-react";
 import {
   saveEmail,
   startOtpTimer,
-} from "../../forgot-password/_utils/otp-timer-presisted";
+} from "../../../../lib/utils/otp-timer-presisted";
 import { toast } from "sonner";
 import ErrorAlert from "../../_components/error-alert";
 import { UseMutateFunction } from "@tanstack/react-query";

@@ -2,17 +2,15 @@
 
 import { useEffect, useState } from "react";
 import StepEmail from "./step-email";
-import StepOtp from "./step-otp";
 import StepResetPassword from "./step-reset-password";
-import useSendEmail from "../_hooks/use-send-email";
-import { getOtpTimeLeft } from "../_utils/otp-timer-presisted";
+import StepInformation from "./step-information";
+import { useSearchParams } from "next/navigation";
 
 export default function ForgotPasswordForm() {
   const [step, setStep] = useState(1);
-  const [timer, setTimer] = useState(getOtpTimeLeft() || 0);
 
-  // hooks
-  const { sendEmail, isPending, error } = useSendEmail();
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
 
   const setStepState = (newStep: number) => {
     setStep(newStep);
@@ -21,24 +19,10 @@ export default function ForgotPasswordForm() {
   const renderStep = () => {
     switch (step) {
       case 1:
-        return (
-          <StepEmail
-            setStep={setStepState}
-            sendEmail={sendEmail}
-            isPending={isPending}
-            error={error}
-          />
-        );
+        return <StepEmail setStep={setStepState} />;
 
       case 2:
-        return (
-          <StepOtp
-            timer={timer}
-            setTimer={setTimer}
-            setStep={setStepState}
-            sendEmail={sendEmail}
-          />
-        );
+        return <StepInformation setStep={setStepState} />;
 
       case 3:
         return <StepResetPassword />;
@@ -47,16 +31,16 @@ export default function ForgotPasswordForm() {
         return null;
     }
   };
-  useEffect(() => {
-    const timeLeft = getOtpTimeLeft();
-    setTimer(timeLeft);
 
-    if (timeLeft > 0) {
-      setStep(2);
+  useEffect(() => {
+    // if there is token go to step 3
+    if (token) {
+      localStorage.setItem("token", token);
+      setStep(3);
     } else {
       setStep((prev) => prev);
     }
   }, []);
 
-  return <section className="w-full lg:w-3/4">{renderStep()}</section>;
+  return <section className="w-10/12 lg:w-3/4">{renderStep()}</section>;
 }
