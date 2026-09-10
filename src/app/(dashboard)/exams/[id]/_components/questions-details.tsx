@@ -115,13 +115,13 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
         ? prev.map((a) =>
             a.questionId === currentQuestion._id
               ? { ...a, correct: answerKey }
-              : a
+              : a,
           )
         : [...prev, { questionId: currentQuestion._id, correct: answerKey }];
 
       localStorage.setItem(
         `exam-answers-${currentExam}`,
-        JSON.stringify(updatedAnswers)
+        JSON.stringify(updatedAnswers),
       );
       return updatedAnswers;
     });
@@ -173,7 +173,7 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
           setIsFinished(false);
           toast.error(err.message);
         },
-      }
+      },
     );
   };
 
@@ -196,12 +196,17 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
     setIsInitialLoad(true);
   };
 
-  const handleExplore = () => router.replace(ROUTES.EXAMS);
+  const handleExplore = () =>
+    router.replace(ROUTES.EXAMS_DIPLOMA.replace(":id", examId));
 
   if (isLoading) return <Loading />;
   if (error) return <p>Error: {error.message}</p>;
   if (!questions?.questions.length)
-    return <p className="bg-white p-6 text-gray-800 text-center">Sorry, No questions found.</p>;
+    return (
+      <p className="bg-white p-6 text-gray-800 text-center">
+        Sorry, No questions found.
+      </p>
+    );
 
   const progress = totalQuestions
     ? ((isFinished ? totalQuestions : currentQuestionIndex + 1) /
@@ -335,8 +340,8 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
             isFinished
               ? handleExplore
               : currentQuestionIndex === totalQuestions - 1
-              ? handleFinish
-              : handleNext
+                ? handleFinish
+                : handleNext
           }
           disabled={isPending}
         >

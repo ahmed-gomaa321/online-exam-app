@@ -1,16 +1,21 @@
 export interface Diploma {
-  _id: string;
-  name: string;
-  icon: string;
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  immutable: boolean;
   createdAt: string;
+  updatedAt: string;
 }
 
-export interface DiplomasResponse {
-  message: string;
-  metadata: {
-    currentPage: number;
-    numberOfPages: number;
-    limit: number;
-  };
-  subjects: Diploma[];
+export interface PaginationMetadata {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface DiplomasPayload {
+  data: Diploma[];
+  metadata: PaginationMetadata;
 }

@@ -2,18 +2,17 @@
 
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getDiplomas } from "@/lib/services/diplomas.service";
-import { DiplomasResponse } from "@/lib/types/diplomas";
+import { DiplomasPayload } from "@/lib/types/diplomas";
 
 export default function useDiplomas() {
-  return useInfiniteQuery<DiplomasResponse, Error>({
+  return useInfiniteQuery<ApiResponse<DiplomasPayload>, Error>({
     queryKey: ["diplomas"],
     queryFn: ({ pageParam = 1 }) => getDiplomas({ pageParam }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
-      if (lastPage.metadata.currentPage < lastPage.metadata.numberOfPages) {
-        return lastPage.metadata.currentPage + 1;
-      }
-      return undefined;
+      if (!lastPage?.status) return undefined;
+      const { page, totalPages } = lastPage?.payload?.metadata;
+      return page < totalPages ? page + 1 : undefined;
     },
   });
 }

@@ -7,6 +7,8 @@ import Image from "next/image";
 import Loading from "../loading";
 import Link from "next/link";
 import { ROUTES } from "@/lib/constants/routes";
+import ErrorAlert from "@/app/(auth)/_components/error-alert";
+import { DiplomaCardSkeleton } from "./diplomas-skeleton";
 
 export default function Diplomas() {
   const {
@@ -20,14 +22,24 @@ export default function Diplomas() {
 
   if (error)
     return (
-      <p className="bg-red-50 p-4 mt-4 text-red-600 font-medium">
-        Error: {error.message}
-      </p>
+      <div className="mt-3 px-4">
+        <ErrorAlert message={error?.message} />
+      </div>
     );
 
-  if (isLoading) return Loading();
-
-  const flatDiplomas = diplomas?.pages.flatMap((page) => page.subjects) || [];
+  if (isLoading) {
+    return (
+      <div className="px-4 xl:px-0 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <DiplomaCardSkeleton key={i} />
+        ))}
+      </div>
+    );
+  }
+  const flatDiplomas =
+    diplomas?.pages.flatMap((page) =>
+      page?.status ? page?.payload?.data : [],
+    ) || [];
 
   // save diploma title in local storage
   const saveDiplomaTitle = (title: string) =>
@@ -44,21 +56,22 @@ export default function Diplomas() {
         <section className="px-4 xl:px-0 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
           {flatDiplomas.map((item) => (
             <Link
-              onClick={() => saveDiplomaTitle(item.name)}
-              key={item._id}
-              href={ROUTES.EXAMS}
+              onClick={() => saveDiplomaTitle(item?.title)}
+              key={item?.id}
+              href={ROUTES.EXAMS_DIPLOMA?.replace(":id", item?.id)}
             >
               <figure className="relative w-full h-[448px] overflow-hidden">
                 <Image
                   quality={100}
-                  src={item.icon}
-                  alt={item.name}
+                  src={item?.image}
+                  alt={item?.title}
                   fill
                   sizes="100%"
                   className="object-cover hover:scale-105 transition-all duration-300"
                 />
-                <div className="absolute bottom-2 left-2 right-2 px-4 py-5 bg-blue-600/50 text-white backdrop-blur">
-                  <span>{item.name}</span>
+                <div className="max-h-64 overflow-auto absolute bottom-2 left-2 right-2 px-4 py-5 bg-blue-600/75 text-white backdrop-blur">
+                  <h2 className="font-semibold">{item?.title}</h2>
+                  <span>{item?.description}</span>
                 </div>
               </figure>
             </Link>

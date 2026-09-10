@@ -8,23 +8,29 @@ export async function GET(req: NextRequest) {
     secureCookie: process.env.NODE_ENV === "production",
   });
 
-  if (!token?.accessToken) {
-    return new Response("Unauthorized", { status: 401 });
+  const rawToken = token?.token;
+
+  if (!rawToken || typeof rawToken !== "string") {
+    return NextResponse.json(
+      { status: false, message: "Unauthorized" },
+      { status: 401 },
+    );
   }
 
-  const { searchParams } = new URL(req.url);
+  const { searchParams } = new URL(req?.url);
   const page = searchParams.get("page") || "1";
   const limit = searchParams.get("limit") || "4";
 
   const res = await fetch(
-    `${process.env.NEXT_API_BASE}/subjects?page=${page}&limit=${limit}`,
+    `${process.env.NEXT_API_BASE}/diplomas?page=${page}&limit=${limit}`,
     {
       headers: {
         "Content-Type": "application/json",
-        token: token.token,
+        Authorization: `Bearer ${rawToken}`,
       },
-    }
+    },
   );
+
   const data = await res.json();
-  return NextResponse.json(data, { status: res.status });
+  return NextResponse.json(data, { status: res?.status });
 }

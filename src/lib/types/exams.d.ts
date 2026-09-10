@@ -1,21 +1,24 @@
-export interface Metadata {
-  currentPage: number;
-  numberOfPages: number;
-  limit: number;
-}
-
 export interface Exam {
-  _id: string;
+  id: string;
   title: string;
+  description: string;
+  image: string;
   duration: number;
-  subject: string;
-  numberOfQuestions: number;
-  active: boolean;
   createdAt: string;
+  questionsCount: number;
 }
 
-export interface ExamsResponse {
-  message: string;
-  metadata: Metadata;
+export interface DiplomaDetails {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  immutable: boolean;
+  createdAt: string;
+  updatedAt: string;
   exams: Exam[];
+}
+
+export interface DiplomaDetailsPayload {
+  diploma: DiplomaDetails;
 }
