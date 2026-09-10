@@ -1,10 +1,10 @@
 "use client";
 
 import {
-  CircleQuestionMark,
   GraduationCap,
   BookOpenCheck,
   UserRound,
+  CircleQuestionMark,
 } from "lucide-react";
 import { ExamNameContext } from "@/components/providers/app/components/exam-name-context";
 import { ROUTES } from "@/lib/constants/routes";
@@ -18,11 +18,11 @@ export interface HeaderTitleType {
 
 export function useHeaderTitle(): HeaderTitleType {
   const pathname = usePathname();
-  const { examName } = useContext(ExamNameContext);
+  const { examName, diplomaName } = useContext(ExamNameContext);
   const parts = pathname.split("/").filter(Boolean);
 
   const [header, setHeader] = useState<HeaderTitleType>({
-    title: "",
+    title: "Diplomas",
     icon: GraduationCap,
   });
 
@@ -31,7 +31,6 @@ export function useHeaderTitle(): HeaderTitleType {
     [ROUTES.ACCOUNT_SETTINGS]: { title: "Account Settings", icon: UserRound },
     [ROUTES.PROFILE]: { title: "Account Settings", icon: UserRound },
     [ROUTES.CHANGE_PASSWORD]: { title: "Account Settings", icon: UserRound },
-    [ROUTES.EXAMS]: { title: "Exams", icon: BookOpenCheck },
   };
 
   useEffect(() => {
@@ -42,14 +41,30 @@ export function useHeaderTitle(): HeaderTitleType {
       return;
     }
 
-    if (parts[0] === "exams" && parts[1]) {
+    if (
+      parts[0] === "exams" &&
+      (parts.length >= 3 || parts.includes("questions"))
+    ) {
       setHeader({
-        title: examName ? `[${examName}] Questions` : "Questions",
+        title: examName ? `${examName} Questions` : "Questions",
         icon: CircleQuestionMark,
       });
       return;
     }
-  }, [pathname, examName]);
+
+    if (parts[0] === "exams" && parts[1]) {
+      setHeader({
+        title: diplomaName ? `${diplomaName} Exams` : "Exams",
+        icon: BookOpenCheck,
+      });
+      return;
+    }
+
+    setHeader({
+      title: "Dashboard",
+      icon: GraduationCap,
+    });
+  }, [pathname, examName, diplomaName]);
 
   return header;
 }

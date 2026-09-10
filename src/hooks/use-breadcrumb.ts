@@ -12,8 +12,7 @@ export type BreadcrumbItemType = {
 
 export function useBreadcrumb(): BreadcrumbItemType[] {
   const pathname = usePathname();
-  const { examName } = useContext(ExamNameContext);
-
+  const { examName, diplomaName } = useContext(ExamNameContext);
   const breadcrumbMap: Record<string, string> = {
     [ROUTES.ACCOUNT_SETTINGS]: "Account",
   };
@@ -35,17 +34,20 @@ export function useBreadcrumb(): BreadcrumbItemType[] {
     const isLast = index === slugs.length - 1;
 
     // exam page
-    if (slugs[0] === "exams" && index === 1 && examName) {
+    if (slugs[0] === "exams" && index === 1) {
       breadcrumbs.push({
-        label: examName,
-        href: ROUTES.EXAMS,
+        label: diplomaName || "Diploma Exams",
+        href: isLast ? undefined : path,
       });
       return;
     }
 
     // questions page
-    if (slugs[0] === "exams" && index === 2 && slugs[2] === "questions") {
-      breadcrumbs.push({ label: "Questions" });
+    if (slugs[0] === "exams" && index === 2 && examName) {
+      breadcrumbs.push({
+        label: examName,
+        href: isLast ? undefined : path,
+      });
       return;
     }
 

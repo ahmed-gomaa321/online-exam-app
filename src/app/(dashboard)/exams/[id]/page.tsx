@@ -1,12 +1,16 @@
-import React from "react";
-import QuestionsDetails from "./_components/questions-details";
+import ExamsList from "../_components/exams-list";
 
-type ExameNameProps = {
-  params: {
-    id: string;
-  };
-};
+interface PageProps {
+  params: Promise<{
+    id: string; //
+  }>;
+}
 
-export default function ExameQuestions({ params: { id } }: ExameNameProps) {
-  return <QuestionsDetails examId={id} />;
+export default async function ExamsDiploma({ params }: PageProps) {
+  const resolvedParams = await params;
+
+
+  const id = resolvedParams.id;
+
+  return <ExamsList id={id} />;
 }

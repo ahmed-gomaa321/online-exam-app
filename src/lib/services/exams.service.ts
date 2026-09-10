@@ -1,16 +1,19 @@
-import { ExamsResponse } from "../types/exams";
+import { DiplomaDetailsPayload } from "../types/exams";
 
-export async function getExams(): Promise<ExamsResponse> {
-  const res = await fetch(`/api/exams`);
+export async function getExams(
+  id: string,
+): Promise<ApiResponse<DiplomaDetailsPayload>> {
+  if (!id || id === "undefined") {
+    throw new Error("Invalid diploma ID provided");
+  }
+
+  const res = await fetch("/api/diplomas/" + id);
+
+  const data = await res.json();
 
   if (!res.ok) {
-    let errorMessage = "Failed to fetch exams";
-
-    const errorData = await res.json();
-    errorMessage = errorData.message || errorMessage;
-
-    throw new Error(errorMessage);
+    throw new Error(data.message || "Failed to fetch exams");
   }
-  const data = await res.json();
+
   return data;
 }

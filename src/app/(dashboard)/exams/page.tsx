@@ -1,5 +1,13 @@
 import ExamsList from "./_components/exams-list";
 
-export default function Exams() {
-  return <ExamsList />;
+type ExamDiplomaProps = {
+  params: Promise<{
+    id: string;
+  }>;
+};
+
+export default async function ExamsDiploma({ params }: ExamDiplomaProps) {
+  const { id } = await params;
+
+  return <ExamsList id={id} />;
 }
