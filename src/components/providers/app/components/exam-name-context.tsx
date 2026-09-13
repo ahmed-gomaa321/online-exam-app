@@ -22,7 +22,7 @@ export function ExamNameProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const savedExam = localStorage.getItem("examName");
-    const savedDiploma = localStorage.getItem("diplomaName");
+    const savedDiploma = localStorage.getItem("diploma-title");
     if (savedExam) setExamName(savedExam);
     if (savedDiploma) setDiplomaName(savedDiploma);
   }, []);
@@ -37,9 +37,9 @@ export function ExamNameProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (diplomaName) {
-      localStorage.setItem("diplomaName", diplomaName);
+      localStorage.setItem("diploma-title", diplomaName);
     } else {
-      localStorage.removeItem("diplomaName");
+      localStorage.removeItem("diploma-title");
     }
   }, [diplomaName]);
 

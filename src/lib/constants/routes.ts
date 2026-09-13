@@ -7,5 +7,5 @@ export const enum ROUTES {
   PROFILE = "/account-settings/profile",
   CHANGE_PASSWORD = "/account-settings/change-password",
   EXAMS_DIPLOMA = "/exams/:id",
-  EXAM_QUESTIONS = "/exams/:id",
+  EXAM_QUESTIONS = "/exams/:id/:examId",
 }

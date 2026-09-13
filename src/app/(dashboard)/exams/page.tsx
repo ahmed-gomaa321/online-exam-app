@@ -1,13 +1,6 @@
-import ExamsList from "./_components/exams-list";
+import { ROUTES } from "@/lib/constants/routes";
+import { redirect } from "next/navigation";
 
-type ExamDiplomaProps = {
-  params: Promise<{
-    id: string;
-  }>;
-};
-
-export default async function ExamsDiploma({ params }: ExamDiplomaProps) {
-  const { id } = await params;
-
-  return <ExamsList id={id} />;
+export default async function ExamsDiploma() {
+  redirect(ROUTES.DASHBOARD);
 }

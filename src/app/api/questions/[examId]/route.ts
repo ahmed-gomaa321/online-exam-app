@@ -1,31 +1,44 @@
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { examId: string } }
-) {
+interface RouteParams {
+  params: Promise<{
+    examId: string;
+  }>;
+}
+
+export async function GET(req: NextRequest, { params }: RouteParams) {
   try {
+    const { examId } = await params;
+
+    if (!examId || examId === "undefined") {
+      return NextResponse.json(
+        { message: "Exam ID is missing" },
+        { status: 400 },
+      );
+    }
+
     const token = await getToken({
       req,
       secret: process.env.NEXTAUTH_SECRET,
       secureCookie: process.env.NODE_ENV === "production",
     });
 
-    if (!token?.accessToken) {
+    const rawToken = token?.token;
+
+    if (!rawToken || typeof rawToken !== "string") {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { examId } = params;
-
     const res = await fetch(
-      `${process.env.NEXT_API_BASE}/questions?exam=${examId}`,
+      `${process.env.NEXT_API_BASE}/questions/exam/${examId}`,
       {
         headers: {
           "Content-Type": "application/json",
-          token: token.token,
+          Authorization: `Bearer ${rawToken}`,
         },
-      }
+        cache: "no-store",
+      },
     );
 
     const data = await res.json();
@@ -34,7 +47,7 @@ export async function GET(
   } catch (error) {
     return NextResponse.json(
       { message: "Internal Server Error", error },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

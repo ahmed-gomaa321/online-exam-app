@@ -9,6 +9,8 @@ import Link from "next/link";
 import { ROUTES } from "@/lib/constants/routes";
 import ErrorAlert from "@/app/(auth)/_components/error-alert";
 import { DiplomaCardSkeleton } from "./diplomas-skeleton";
+import { useContext } from "react";
+import { ExamNameContext } from "@/components/providers/app/components/exam-name-context";
 
 export default function Diplomas() {
   const {
@@ -19,6 +21,7 @@ export default function Diplomas() {
     isFetching,
     error,
   } = useDiplomas();
+  const { setDiplomaName } = useContext(ExamNameContext);
 
   if (error)
     return (
@@ -45,6 +48,10 @@ export default function Diplomas() {
   const saveDiplomaTitle = (title: string) =>
     localStorage.setItem("diploma-title", title);
 
+  const handleDiplomaClick = (title: string) => {
+    setDiplomaName(title);
+  };
+
   return (
     <>
       <InfiniteScroll
@@ -56,19 +63,26 @@ export default function Diplomas() {
         <section className="px-4 xl:px-0 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
           {flatDiplomas.map((item) => (
             <Link
-              onClick={() => saveDiplomaTitle(item?.title)}
+              onClick={() => handleDiplomaClick(item?.title)}
               key={item?.id}
               href={ROUTES.EXAMS_DIPLOMA?.replace(":id", item?.id)}
             >
               <figure className="relative w-full h-[448px] overflow-hidden">
-                <Image
-                  quality={100}
-                  src={item?.image}
-                  alt={item?.title}
-                  fill
-                  sizes="100%"
-                  className="object-cover hover:scale-105 transition-all duration-300"
-                />
+                {item?.image ? (
+                  <Image
+                    quality={100}
+                    src={item.image}
+                    alt={item?.title || "Diploma Image"}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover hover:scale-105 transition-all duration-300"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400">
+                    {item?.title} exam
+                  </div>
+                )}
+
                 <div className="max-h-64 overflow-auto absolute bottom-2 left-2 right-2 px-4 py-5 bg-blue-600/75 text-white backdrop-blur">
                   <h2 className="font-semibold">{item?.title}</h2>
                   <span>{item?.description}</span>
