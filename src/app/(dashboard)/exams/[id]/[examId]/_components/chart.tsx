@@ -1,8 +1,6 @@
 "use client";
 
-import { TrendingUp } from "lucide-react";
 import { Cell, Pie, PieChart } from "recharts";
-
 import { Card, CardContent } from "@/components/ui/card";
 import {
   ChartConfig,
@@ -10,8 +8,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { useEffect, useState } from "react";
-import { ExamResult } from "@/lib/types/questions-results";
 
 export const description = "A donut chart";
 
@@ -26,24 +22,21 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function Chart() {
-  const [results, setResults] = useState<ExamResult | null>(null);
+type ChartProps = {
+  correct: number;
+  wrong: number;
+};
 
-  useEffect(() => {
-    const results = localStorage.getItem("exam-results");
-    if (results) setResults(JSON.parse(results));
-  }, []);
+export function Chart({ correct, wrong }: ChartProps) {
+  const total = correct + wrong;
 
-  const correct = results?.correct ?? 0;
-  const inCorrect = results?.wrong ?? 0;
-  const total = correct + inCorrect;
   const chartData = [
     { name: "Correct", value: total > 0 ? (correct / total) * 100 : 0 },
-    { name: "Incorrect", value: total > 0 ? (inCorrect / total) * 100 : 0 },
+    { name: "Incorrect", value: total > 0 ? (wrong / total) * 100 : 0 },
   ];
 
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col border-none shadow-none">
       <CardContent className="flex-1 pb-0">
         <ChartContainer
           config={chartConfig}
@@ -59,7 +52,7 @@ export function Chart() {
               dataKey="value"
               nameKey="name"
               innerRadius={60}
-               stroke="none"
+              stroke="none"
             >
               {chartData.map((entry) => (
                 <Cell

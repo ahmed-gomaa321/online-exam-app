@@ -1,4 +1,12 @@
-export async function getQuestions(examId: string) {
+import { QuestionsPayload } from "../types/questions";
+
+export async function getQuestions(
+  examId: string,
+): Promise<ApiResponse<QuestionsPayload>> {
+  if (!examId || examId === "undefined") {
+    throw new Error("Invalid exam ID provided");
+  }
+
   const res = await fetch("/api/questions/" + examId);
 
   if (!res.ok) {

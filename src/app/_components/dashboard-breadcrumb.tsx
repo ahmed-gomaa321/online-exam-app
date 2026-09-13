@@ -27,13 +27,13 @@ export default function DashboardBreadcrumb() {
             <BreadcrumbItem className="cursor-pointer">
               {index !== lastIndex && item.href ? (
                 <BreadcrumbLink
-                  className="active:scale-90 text-xs md:text-sm"
+                  className="active:scale-90 text-[7px] sm:text-xs"
                   href={item.href}
                 >
                   {item.label}
                 </BreadcrumbLink>
               ) : (
-                <span className="text-blue-600 text-xs md:text-sm">
+                <span className="text-blue-600 text-[7px] sm:text-xs">
                   {item.label}
                 </span>
               )}

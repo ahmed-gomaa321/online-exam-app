@@ -2,8 +2,6 @@
 
 import { ExamNameContext } from "@/components/providers/app/components/exam-name-context";
 import { useContext, useEffect, useState } from "react";
-import useQuestions from "../../_hooks/use-questions";
-import useQuestionsResults from "../../_hooks/use-questions-results";
 import Loading from "@/app/loading";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,13 +10,20 @@ import {
   FolderSearch,
   RotateCcw,
 } from "lucide-react";
-import { UserAnswer } from "@/lib/types/questions";
-import { formatTime } from "../../_utils/formate-time";
-import { getRemainingTime } from "../../_utils/exam-time";
 import { toast } from "sonner";
 import Result from "./result";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "@/lib/constants/routes";
+import useQuestions from "../../../_hooks/use-questions";
+import useQuestionsResults from "../../../_hooks/use-questions-results";
+import { getRemainingTime } from "../../../_utils/exam-time";
+import { formatTime } from "../../../_utils/formate-time";
+import useExams from "../../../_hooks/use-exams";
+
+interface AnswerState {
+  questionId: string;
+  answerId: string;
+}
 
 export default function QuestionsDetails({ examId }: { examId: string }) {
   const router = useRouter();
@@ -26,23 +31,48 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
 
   const { data: questions, isLoading, error } = useQuestions(examId);
   const { data: results, isPending, submitExam } = useQuestionsResults();
+  const { data: getExamInfo } = useExams(examId);
 
-  const [diplomaTitle, setDiplomaTitle] = useState("");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<UserAnswer[]>([]);
+  const [answers, setAnswers] = useState<AnswerState[]>([]);
+  const [totalDurationSeconds, setTotalDurationSeconds] = useState(0);
   const [timeLeft, setTimeLeft] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [savedResult, setSavedResult] = useState<any>(null);
 
-  const totalQuestions = questions?.questions.length ?? 0;
-  const currentQuestion = questions?.questions[currentQuestionIndex] ?? null;
-  const currentExam = currentQuestion?.exam?.title ?? null;
+  const totalQuestions =
+    (questions && questions?.status && questions?.payload?.questions?.length) ??
+    0;
+  const currentQuestion =
+    (questions &&
+      questions?.status &&
+      questions?.payload?.questions?.[currentQuestionIndex]) ??
+    null;
+  const currentExam = examName ?? null;
 
-  // Load diploma title
+  const diplomaTitle =
+    (getExamInfo &&
+      getExamInfo?.status &&
+      getExamInfo?.payload?.diploma?.title) ||
+    (typeof window !== "undefined"
+      ? localStorage.getItem("diploma-title")
+      : "") ||
+    "";
+
+  // Load initial saved results from localStorage safely
   useEffect(() => {
-    const title = localStorage.getItem("diploma-title");
-    if (title) setDiplomaTitle(title);
-  }, []);
+    if (typeof window !== "undefined") {
+      const cachedRes = localStorage.getItem(`exam-results-${examId}`);
+      if (cachedRes) {
+        try {
+          setSavedResult(JSON.parse(cachedRes));
+        } catch {
+          setSavedResult(null);
+        }
+      }
+    }
+  }, [examId, isFinished]);
 
   // Restore exam state
   useEffect(() => {
@@ -51,6 +81,7 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
     const finished =
       localStorage.getItem(`exam-finished-${currentExam}`) === "true";
     setIsFinished(finished);
+
     if (finished) {
       setTimeLeft(0);
       setIsInitialLoad(false);
@@ -67,10 +98,12 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
     }
 
     const savedIndex = localStorage.getItem(`exam-${currentExam}`);
-    if (savedIndex) setCurrentQuestionIndex(parseInt(savedIndex));
+    if (savedIndex) setCurrentQuestionIndex(parseInt(savedIndex, 10));
 
-    const durationMinutes = questions?.questions[0].exam.duration ?? 0;
-    const totalSeconds = durationMinutes * 60;
+    const savedDuration =
+      localStorage.getItem(`exam-duration-${examId}`) ?? "0";
+    const totalSeconds = Number(savedDuration) * 60;
+    setTotalDurationSeconds(totalSeconds);
 
     let savedStart = localStorage.getItem(`time-startTime-${currentExam}`);
     if (!savedStart) {
@@ -83,9 +116,8 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
       startTime: savedStart,
     });
     setTimeLeft(rem > 0 ? rem : 0);
-
     setIsInitialLoad(false);
-  }, [currentExam, totalQuestions]);
+  }, [currentExam, totalQuestions, examId]);
 
   // Timer countdown
   useEffect(() => {
@@ -98,26 +130,28 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
     return () => clearInterval(interval);
   }, [timeLeft, isFinished]);
 
-  // Auto-finish when time = 0
+  // Auto-finish when time reaches 0
   useEffect(() => {
-    if (timeLeft === 0 && !isFinished && totalQuestions > 0 && !isInitialLoad) {
+    if (
+      timeLeft === 0 &&
+      !isFinished &&
+      +totalQuestions > 0 &&
+      !isInitialLoad
+    ) {
       handleFinish();
     }
   }, [timeLeft, isFinished, totalQuestions, isInitialLoad]);
 
-  // Handle answer selection
-  const handleSelectAnswer = (answerKey: string) => {
+  const handleSelectAnswer = (answerId: string) => {
     if (!currentQuestion) return;
 
     setAnswers((prev) => {
-      const exist = prev.find((a) => a.questionId === currentQuestion._id);
+      const exist = prev.find((a) => a.questionId === currentQuestion.id);
       const updatedAnswers = exist
         ? prev.map((a) =>
-            a.questionId === currentQuestion._id
-              ? { ...a, correct: answerKey }
-              : a,
+            a.questionId === currentQuestion.id ? { ...a, answerId } : a,
           )
-        : [...prev, { questionId: currentQuestion._id, correct: answerKey }];
+        : [...prev, { questionId: currentQuestion.id, answerId }];
 
       localStorage.setItem(
         `exam-answers-${currentExam}`,
@@ -127,9 +161,8 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
     });
   };
 
-  // Navigation
   const handleNext = () => {
-    if (!currentExam || currentQuestionIndex >= totalQuestions - 1) return;
+    if (!currentExam || currentQuestionIndex >= +totalQuestions - 1) return;
     const next = currentQuestionIndex + 1;
     setCurrentQuestionIndex(next);
     localStorage.setItem(`exam-${currentExam}`, next.toString());
@@ -142,31 +175,36 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
     localStorage.setItem(`exam-${currentExam}`, prev.toString());
   };
 
-  // Finish exam
   const handleFinish = () => {
     if (!questions || isFinished) return;
 
-    const duration = questions.questions[0].exam.duration ?? 0;
-    const totalSeconds = duration * 60;
-    const spentSeconds = totalSeconds - timeLeft;
-    const spentMinutes = Math.floor(spentSeconds / 60);
+    const savedStart = localStorage.getItem(`time-startTime-${currentExam}`);
+    const startedAt = savedStart
+      ? new Date(Number(savedStart)).toISOString()
+      : new Date().toISOString();
 
-    const finalAnswers = questions.questions.map((q) => {
-      const userAnswer = answers.find((a) => a.questionId === q._id);
-      return {
-        questionId: q._id,
-        correct: userAnswer?.correct ?? "not answered",
-      };
-    });
+    // Load fresh answers from storage to prevent stale state issues
+    const rawAnswers = localStorage.getItem(`exam-answers-${currentExam}`);
+    const currentAnswersState: AnswerState[] = rawAnswers
+      ? JSON.parse(rawAnswers)
+      : answers;
+
+    const finalAnswers = currentAnswersState
+      .filter((ans) => ans.answerId)
+      .map((ans) => ({
+        questionId: ans.questionId,
+        answerId: ans.answerId,
+      }));
 
     submitExam(
-      { answers: finalAnswers, time: spentMinutes },
+      { examId, answers: finalAnswers, startedAt },
       {
         onSuccess: (res) => {
-          localStorage.setItem("exam-results", JSON.stringify(res));
-          toast.success("Submitted successfully");
+          localStorage.setItem(`exam-results-${examId}`, JSON.stringify(res));
           localStorage.setItem(`exam-finished-${currentExam}`, "true");
+          setSavedResult(res);
           setIsFinished(true);
+          toast.success("Submitted successfully");
         },
         onError: (err) => {
           localStorage.removeItem(`exam-finished-${currentExam}`);
@@ -177,20 +215,19 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
     );
   };
 
-  // Restart exam
   const handleRestart = () => {
     if (!currentExam) return;
-
+    localStorage.removeItem(`exam-results-${examId}`);
     localStorage.removeItem(`exam-finished-${currentExam}`);
     localStorage.removeItem(`exam-${currentExam}`);
     localStorage.removeItem(`exam-answers-${currentExam}`);
 
-    const duration = questions?.questions[0].exam.duration ?? 0;
     const now = Date.now();
     localStorage.setItem(`time-startTime-${currentExam}`, now.toString());
-    setTimeLeft(duration * 60);
+    setTimeLeft(totalDurationSeconds);
 
     setIsFinished(false);
+    setSavedResult(null);
     setCurrentQuestionIndex(0);
     setAnswers([]);
     setIsInitialLoad(true);
@@ -201,7 +238,7 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
 
   if (isLoading) return <Loading />;
   if (error) return <p>Error: {error.message}</p>;
-  if (!questions?.questions.length)
+  if (!questions?.status || !questions?.payload?.questions.length)
     return (
       <p className="bg-white p-6 text-gray-800 text-center">
         Sorry, No questions found.
@@ -214,21 +251,23 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
       100
     : 0;
 
-  const durationSeconds = questions.questions[0].exam.duration * 60;
-  const progressDeg = ((durationSeconds - timeLeft) / durationSeconds) * 360;
+  const progressDeg =
+    totalDurationSeconds > 0
+      ? ((totalDurationSeconds - timeLeft) / totalDurationSeconds) * 360
+      : 0;
 
   return (
-    <section className="bg-white p-6 flex flex-col gap-6">
+    <section className="bg-white pt-2 px-6 flex flex-col gap-2 mt-0">
       {/* Header */}
-      <div className="flex flex-col gap-3 md:gap-0 md:flex-row md:justify-between text-gray-500 text-xs md:text-sm">
+      <div className="flex flex-col md:gap-0 md:flex-row md:justify-between text-gray-500 text-xs md:text-sm">
         <div>
           {diplomaTitle} - {examName}
         </div>
         <div className="flex items-center gap-1">
-          Question
+          Question{" "}
           <span className="font-bold text-sm text-blue-600">
-            {isFinished || results ? totalQuestions : currentQuestionIndex + 1}
-          </span>
+            {isFinished ? totalQuestions : currentQuestionIndex + 1}
+          </span>{" "}
           of {totalQuestions}
         </div>
       </div>
@@ -241,63 +280,57 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
         ></div>
       </div>
 
-      {/* Question */}
+      {/* Main Content */}
       {!isFinished ? (
-        <section>
+        <section className="mt-3 md:mt-4">
           <p className="font-semibold md:text-2xl text-blue-600">
-            {currentQuestion?.question}
+            {currentQuestion && currentQuestion?.text}
           </p>
-          <div className="flex flex-col gap-2 mt-4 xl:mt-0">
-            {currentQuestion?.answers.map((a) => {
-              const selected =
-                answers.find((ans) => ans.questionId === currentQuestion?._id)
-                  ?.correct === a.key;
-              return (
-                <button
-                  key={a.key}
-                  className="p-2 xl:p-4 grid grid-cols-12 xl:flex items-center gap-2 border bg-gray-50 hover:bg-gray-100"
-                  onClick={() => handleSelectAnswer(a.key)}
-                >
-                  <span
-                    className={`w-4 h-4 col-span-1 rounded-full border relative ${
-                      selected ? "border-blue-600" : "border-gray-300"
-                    }`}
+          <div className="flex flex-col gap-2 mt-4 xl:mt-2">
+            {currentQuestion &&
+              currentQuestion?.answers.map((a) => {
+                const selected =
+                  answers.find((ans) => ans.questionId === currentQuestion?.id)
+                    ?.answerId === a?.id;
+                return (
+                  <button
+                    key={a.id}
+                    className="p-2 xl:p-4 grid grid-cols-12 xl:flex items-center gap-2 border bg-gray-50 hover:bg-gray-100"
+                    onClick={() => handleSelectAnswer(a.id)}
                   >
-                    {selected && (
-                      <span className="w-3 h-3 bg-blue-600 rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></span>
-                    )}
-                  </span>
-                  <span className="col-span-11 text-xs xl:text-base overflow-auto text-start">
-                    {a.answer}
-                  </span>
-                </button>
-              );
-            })}
+                    <span
+                      className={`w-4 h-4 col-span-1 rounded-full border relative ${
+                        selected ? "border-blue-600" : "border-gray-300"
+                      }`}
+                    >
+                      {selected && (
+                        <span className="w-3 h-3 bg-blue-600 rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></span>
+                      )}
+                    </span>
+                    <span className="col-span-11 text-xs xl:text-base overflow-auto text-start">
+                      {a?.text}
+                    </span>
+                  </button>
+                );
+              })}
           </div>
         </section>
       ) : (
-        <Result
-          result={
-            results ||
-            JSON.parse(localStorage.getItem("exam-results") || "null")
-          }
-        />
+        <Result result={results || savedResult} examId={examId} />
       )}
 
-      {/* Navigation & Timer */}
+      {/* Navigation Footer */}
       <div
-        className={`grid ${
-          isFinished ? "grid-cols-12" : "grid-cols-10 xl:grid-cols-11"
-        } gap-2 items-center`}
+        className={`grid ${isFinished ? "grid-cols-12" : "grid-cols-10 xl:grid-cols-11"} gap-2 items-center`}
       >
         <Button
           variant="secondary"
-          className={`${
+          className={
             isFinished
               ? "col-span-12 xl:col-span-6"
               : "col-span-4 xl:col-span-5"
-          }`}
-          disabled={isFinished ? false : currentQuestionIndex === 0}
+          }
+          disabled={!isFinished && currentQuestionIndex === 0}
           onClick={isFinished ? handleRestart : handlePrevious}
         >
           {isFinished ? (
@@ -311,35 +344,33 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
           )}
         </Button>
 
-        <div
-          className={`col-span-2 xl:col-span-1 flex justify-center ${
-            isFinished ? "hidden" : ""
-          }`}
-        >
-          <div
-            className="relative w-[50px] h-[50px] rounded-full flex justify-center items-center"
-            style={{
-              background: `conic-gradient(#e0f2fe ${progressDeg}deg, #2563eb 0deg)`,
-            }}
-          >
-            <div className="w-[40px] h-[40px] rounded-full bg-white flex justify-center items-center">
-              <span className="text-xs font-bold text-blue-600">
-                {formatTime(timeLeft)}
-              </span>
+        {!isFinished && (
+          <div className="col-span-2 xl:col-span-1 flex justify-center">
+            <div
+              className="relative w-[50px] h-[50px] rounded-full flex justify-center items-center"
+              style={{
+                background: `conic-gradient(#e0f2fe ${progressDeg}deg, #2563eb 0deg)`,
+              }}
+            >
+              <div className="w-[40px] h-[40px] rounded-full bg-white flex justify-center items-center">
+                <span className="text-xs font-bold text-blue-600">
+                  {formatTime(timeLeft)}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         <Button
-          className={`${
+          className={
             isFinished
               ? "col-span-12 xl:col-span-6"
               : "col-span-4 xl:col-span-5"
-          }`}
+          }
           onClick={
             isFinished
               ? handleExplore
-              : currentQuestionIndex === totalQuestions - 1
+              : currentQuestionIndex === +totalQuestions - 1
                 ? handleFinish
                 : handleNext
           }
@@ -349,7 +380,7 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
             <>
               <FolderSearch size={18} /> Explore
             </>
-          ) : currentQuestionIndex === totalQuestions - 1 ? (
+          ) : currentQuestionIndex === +totalQuestions - 1 ? (
             isPending ? (
               "Finishing..."
             ) : (

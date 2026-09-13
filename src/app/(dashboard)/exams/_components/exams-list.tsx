@@ -17,8 +17,19 @@ export default function ExamsList({ id }: { id: string }) {
   // context
   const { setExamName, setDiplomaName } = useContext(ExamNameContext);
   // tanstack query
-  const { data: diplomasExams, isLoading, error } = useExams(id);
+  const { data: diplomasExams, isPending, isFetching, error } = useExams(id);
 
+  // remove all saved local storage data when the component unmounts
+  useEffect(() => {
+    const localStorageKeys = Object.keys(localStorage);
+    localStorageKeys.forEach((key) => {
+      if (key.startsWith("exam-") || key.startsWith("time-")) {
+        localStorage.removeItem(key);
+      }
+    });
+  }, []);
+
+  // set diploma name when diplomasExams changes
   useEffect(() => {
     setExamName("");
 
@@ -31,7 +42,7 @@ export default function ExamsList({ id }: { id: string }) {
     }
   }, [diplomasExams, setExamName, setDiplomaName]);
 
-  if (isLoading) {
+  if (isPending || isFetching) {
     return (
       <div className="px-4 xl:px-0 gap-2">
         {Array.from({ length: 6 }).map((_, i) => (
@@ -64,12 +75,23 @@ export default function ExamsList({ id }: { id: string }) {
     <section className="bg-white px-6 flex flex-col gap-4">
       {exams.map((exam) => (
         <Link
-          href={ROUTES.EXAM_QUESTIONS.replace(":id", exam.id)}
-          onClick={() => setExamName(exam?.title)}
+          href={ROUTES.EXAM_QUESTIONS.replace(":id", id).replace(
+            ":examId",
+            exam?.id,
+          )}
+          onClick={() => {
+            setExamName(exam?.title);
+            if (exam?.id && exam?.duration) {
+              localStorage.setItem(
+                `exam-duration-${exam.id}`,
+                exam.duration.toString(),
+              );
+            }
+          }}
           key={exam?.id}
           className="group relative overflow-hidden p-4 flex items-center gap-4 bg-blue-50 hover:bg-blue-100 transition-colors duration-300 cursor-pointer border border-transparent hover:border-blue-500 hover:border-dashed"
         >
-          <figure className="w-[100px] h-[100px] relative overflow-hidden">
+          <figure className="w-[50px] h-[50px] md:w-[100px] md:h-[100px] relative overflow-hidden">
             <Image
               quality={100}
               src={
@@ -83,16 +105,16 @@ export default function ExamsList({ id }: { id: string }) {
           </figure>
           <div className="flex flex-col gap-2 flex-1 mb-auto">
             <div className="flex items-center justify-between">
-              <p className="text-blue-600 font-semibold text-xs md:text-base xl:text-xl">
+              <p className="text-blue-600 font-semibold text-[8px] sm:text-xs md:text-base xl:text-xl">
                 {exam?.title}
               </p>
               <div className="text-xs flex items-center space-x-1">
-                <span className="text-gray-500 text-xs flex items-center gap-1">
+                <span className="text-gray-500 text-[7px] md:text-xs flex items-center gap-1">
                   <CircleQuestionMark size={18} /> {exam?.questionsCount}{" "}
                   {isMobile ? "ques" : "questions"}
                 </span>
                 <span className="text-gray-500">|</span>
-                <span className="text-gray-500 text-xs flex items-center gap-1">
+                <span className="text-gray-500 text-[7px] md:text-xs flex items-center gap-1">
                   <Timer size={18} /> {exam?.duration}{" "}
                   {isMobile ? "min" : "minutes"}
                 </span>
