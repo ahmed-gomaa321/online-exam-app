@@ -8,7 +8,7 @@ export default function useDeleteMyAccount() {
   const { isPending, error, mutate } = useMutation({
     mutationFn: async () => {
       const res = await deleteMyAccount();
-      if ("code" in res) {
+      if (res.status === "false") {
         throw new Error(res.message);
       }
       return res;

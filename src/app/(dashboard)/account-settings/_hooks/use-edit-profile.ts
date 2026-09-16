@@ -7,37 +7,35 @@ import { toast } from "sonner";
 
 type UpdateSession = (
   data?: Partial<Session> | undefined,
-  force?: boolean
+  force?: boolean,
 ) => Promise<Session | null>;
 
 export default function useEditProfile(
   update: UpdateSession,
-  session: Session | null
+  session: Session | null,
 ) {
   const { isPending, error, mutate } = useMutation({
     mutationFn: async (data: ProfileFormFields) => {
       const res = await editProfile(data);
-      if ("code" in res) {
+      if (res?.status === "false") {
         throw new Error(res.message);
       }
 
       return res;
     },
 
-    onSuccess: (res) => {
+    onSuccess: async (res) => {
       toast.success("Profile updated successfully");
 
+      const updatedFields = res?.user || res?.data || res?.payload?.user;
+
       if (session) {
-        update(
-          {
-            ...session,
-            user: {
-              ...session.user,
-              ...res.user,
-            },
+        await update({
+          user: {
+            ...session.user,
+            ...updatedFields,
           },
-          true
-        );
+        });
       }
     },
   });

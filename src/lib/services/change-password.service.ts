@@ -1,13 +1,21 @@
-import { changePasswordFiels } from "../types/account-settings-types/change-password";
+"use server";
 
-export async function changePassword(data: changePasswordFiels) {
-  const res = await fetch("/api/change-password", {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
+import { ChangePasswordFiels } from "../types/account-settings-types/change-password";
+import { getDecodedToken } from "./get-token.service";
+
+export async function changePassword(data: ChangePasswordFiels) {
+  const token = await getDecodedToken();
+  const res = await fetch(
+    `${process.env.NEXT_API_BASE}/users/change-password`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
     },
-    body: JSON.stringify(data),
-  });
+  );
 
   if (!res.ok) {
     let errorMessage = "Failed to change password";

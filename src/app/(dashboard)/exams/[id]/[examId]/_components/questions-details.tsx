@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import Result from "./result";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { ROUTES } from "@/lib/constants/routes";
 import useQuestions from "../../../_hooks/use-questions";
 import useQuestionsResults from "../../../_hooks/use-questions-results";
@@ -24,14 +24,21 @@ interface AnswerState {
   questionId: string;
   answerId: string;
 }
+interface ExamParams {
+  id: string;
+  examId: string;
+}
 
 export default function QuestionsDetails({ examId }: { examId: string }) {
+  const params = useParams() as unknown as ExamParams;
+  const diplomaId = params?.id;
+
   const router = useRouter();
   const { examName } = useContext(ExamNameContext);
 
   const { data: questions, isLoading, error } = useQuestions(examId);
   const { data: results, isPending, submitExam } = useQuestionsResults();
-  const { data: getExamInfo } = useExams(examId);
+  const { data: getExamInfo } = useExams(diplomaId);
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<AnswerState[]>([]);
@@ -234,7 +241,7 @@ export default function QuestionsDetails({ examId }: { examId: string }) {
   };
 
   const handleExplore = () =>
-    router.replace(ROUTES.EXAMS_DIPLOMA.replace(":id", examId));
+    router.replace(ROUTES.EXAMS_DIPLOMA.replace(":id", diplomaId));
 
   if (isLoading) return <Loading />;
   if (error) return <p>Error: {error.message}</p>;

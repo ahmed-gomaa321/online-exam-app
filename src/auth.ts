@@ -46,21 +46,27 @@ export const authOptions: AuthOptions = {
         token.user = user.user;
       }
 
-      if (trigger === "update" && session?.user) {
-        token.user = {
-          ...token.user,
-          ...session.user,
-        };
+      if (trigger === "update") {
+        const updatedUserData = session?.user || session;
+
+        if (updatedUserData) {
+          token.user = {
+            ...(token.user as object),
+            ...updatedUserData,
+          };
+        }
+
+        if (session?.accessToken) {
+          token.token = session.accessToken;
+        }
       }
 
-      if (trigger === "update" && session?.accessToken) {
-        token.token = session.accessToken;
-      }
       return token;
     },
+
     session: ({ session, token }) => {
-      if (token) {
-        session.user = token.user;
+      if (token?.user) {
+        session.user = token.user as typeof session.user;
       }
       return session;
     },

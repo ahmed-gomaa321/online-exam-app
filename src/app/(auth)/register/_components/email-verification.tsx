@@ -25,25 +25,43 @@ import { toast } from "sonner";
 import ErrorAlert from "../../_components/error-alert";
 import { UseMutateFunction } from "@tanstack/react-query";
 import { VerifyEmailPayload } from "@/lib/types/auth-types/register";
+import { Dispatch, SetStateAction } from "react";
+import {
+  ChangeEmailFields,
+  ChangeEmailPayload,
+} from "@/lib/types/account-settings-types/edit-profile";
 
-type Props = {
-  setStep: (step: 1 | 2 | 3 | 4) => void;
-  verifyEmail: UseMutateFunction<
+type Props<T extends number = number> = {
+  setStep: Dispatch<SetStateAction<T>> | ((step: T) => void);
+  verifyEmail?: UseMutateFunction<
     ApiResponse<VerifyEmailPayload>,
     Error,
     verifyEmailData,
     unknown
   >;
-  isPending: boolean;
-  error: Error | null;
+  isPending?: boolean;
+  error?: Error | null;
+  changeEmail?: UseMutateFunction<
+    ApiResponse<ChangeEmailPayload>,
+    Error,
+    ChangeEmailFields,
+    unknown
+  >;
+  changeEmailPending?: boolean;
+  changeEmailError?: Error | null;
+  isChangeEmail?: boolean;
 };
 
-export default function EmailVerification({
+export default function EmailVerification<T extends number>({
   setStep,
   verifyEmail,
   isPending,
   error,
-}: Props) {
+  changeEmail,
+  changeEmailPending = false,
+  changeEmailError = null,
+  isChangeEmail = false,
+}: Props<T>) {
   // react hook form
   const form = useForm<verifyEmailData>({
     defaultValues: {
@@ -52,28 +70,49 @@ export default function EmailVerification({
     resolver: zodResolver(registerStep1Schema),
   });
 
+  const activePending = isChangeEmail ? changeEmailPending : isPending;
+  const activeError = isChangeEmail ? changeEmailError : error;
+
   const onSubmit = (data: verifyEmailData) => {
-    verifyEmail(data, {
-      onSuccess: () => {
-        saveEmail(data.email);
-        toast.success("Verification code sent to your email.");
-        setStep(2);
-        startOtpTimer();
-      },
-      onError: (error) => {
-        toast.error(error?.message || "Something went wrong");
-      },
-    });
+    const handleSuccess = () => {
+      saveEmail(data.email);
+      toast.success("Verification code sent to your email.");
+      setStep(2 as T);
+      startOtpTimer();
+    };
+
+    const handleError = (err: Error) => {
+      toast.error(err?.message || "Something went wrong");
+    };
+
+    if (isChangeEmail && changeEmail) {
+      const payload = { newEmail: data.email } as unknown as ChangeEmailFields;
+      changeEmail(payload, {
+        onSuccess: handleSuccess,
+      });
+    } else {
+      if (verifyEmail) {
+        verifyEmail(data, {
+          onSuccess: handleSuccess,
+          onError: handleError,
+        });
+      }
+    }
   };
 
   return (
     <section className="w-full">
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="p-8 flex flex-col gap-y-4"
+        onSubmit={(e) => {
+          e.stopPropagation();
+          form.handleSubmit(onSubmit)(e);
+        }}
+        className={`${!isChangeEmail ? "p-8" : "pt-0 space-y-6"} flex flex-col gap-y-4`}
       >
-        <h2 className="font-bold text-3xl font-inter">Create Account</h2>
-        <FieldGroup>
+        {!isChangeEmail && (
+          <h2 className="font-bold text-3xl font-inter">Create Account</h2>
+        )}
+        <FieldGroup className={`${!isChangeEmail ? "" : "w-11/12 mx-auto"}`}>
           <Controller
             name="email"
             control={form.control}
@@ -98,28 +137,34 @@ export default function EmailVerification({
           />
         </FieldGroup>
 
-        {error && <ErrorAlert message={error.message} />}
+        {/* error */}
+        {activeError && <ErrorAlert message={activeError.message} />}
 
-        <Button
-          variant={"outline"}
-          type="submit"
-          disabled={form.formState.isSubmitting || isPending}
-        >
-          {form.formState.isSubmitting || isPending ? (
-            "Sending..."
-          ) : (
-            <span className="flex justify-center items-center gap-1">
-              Next <ChevronRight />
-            </span>
-          )}
-        </Button>
+        <div className={`${isChangeEmail ? "border-t pt-6 w-full" : ""}`}>
+          <Button
+            className="w-full"
+            variant={!isChangeEmail ? "outline" : "default"}
+            type="submit"
+            disabled={form.formState.isSubmitting || activePending}
+          >
+            {form.formState.isSubmitting || activePending ? (
+              "Sending..."
+            ) : (
+              <span className="flex justify-center items-center gap-1">
+                Next <ChevronRight />
+              </span>
+            )}
+          </Button>
+        </div>
       </form>
 
-      <FormFooter
-        text="Already have an account?"
-        linkText="Login"
-        linkHref={ROUTES.LOGIN}
-      />
+      {!isChangeEmail && (
+        <FormFooter
+          text="Already have an account?"
+          linkText="Login"
+          linkHref={ROUTES.LOGIN}
+        />
+      )}
     </section>
   );
 }
