@@ -12,7 +12,7 @@ import {
 } from "@/lib/schemes/auth.schemes";
 
 // verify email hook
-export function useverifyEmail() {
+export function useVerifyEmail() {
   const { isPending, error, mutate } = useMutation({
     mutationFn: async (data: verifyEmailData) => {
       const payload = await emailVerificationService(data);
@@ -26,7 +26,7 @@ export function useverifyEmail() {
 }
 
 // confirm email verify hook
-export function useconfirmVerifyEmail() {
+export function useConfirmVerifyEmail() {
   const { isPending, error, mutate } = useMutation({
     mutationFn: async (data: confirmVerifyEmailData) => {
       const payload = await confirmEmailVerification(data);

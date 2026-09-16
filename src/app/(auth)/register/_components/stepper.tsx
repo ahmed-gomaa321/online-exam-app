@@ -4,12 +4,21 @@ import { Rectangle } from "recharts";
 interface StepperProps {
   currentStep: number;
   totalSteps: number;
+  isChangeEmail?: boolean;
 }
 
-export default function Stepper({ currentStep, totalSteps }: StepperProps) {
+export default function Stepper({
+  currentStep,
+  totalSteps,
+  isChangeEmail,
+}: StepperProps) {
+  const isHidden = currentStep === 1 && !isChangeEmail;
+
   return (
     <div
-      className={`flex items-center justify-center w-11/12 mx-auto gap-1 ${currentStep === 1 ? "hidden" : ""}`}
+      className={`flex items-center justify-center w-11/12 mx-auto gap-1 ${
+        isHidden ? "hidden" : ""
+      }`}
     >
       {Array.from({ length: totalSteps }).map((_, index) => {
         const stepNumber = index + 1;

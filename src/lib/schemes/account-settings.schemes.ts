@@ -10,18 +10,7 @@ export const editProfileSchema = z.object({
     .string()
     .min(2, "Last name must be at least 2 characters")
     .optional(),
-
-  username: z
-    .string()
-    .min(3, "Username must be at least 3 characters")
-    .regex(
-      /^[a-zA-Z0-9_. ]+$/,
-      "Username can only contain letters, numbers, _ and spaces"
-    )
-    .optional(),
-
-  email: z.string().email("Please enter a valid email").optional(),
-
+  profilePhoto: z.string().optional(),
   phone: z
     .string()
     .transform((val) => {
@@ -36,4 +25,13 @@ export const editProfileSchema = z.object({
       return /^01[0125][0-9]{8}$/.test(val);
     }, "Invalid Egyptian phone number")
     .optional(),
+});
+
+export const changeEmailSchema = z.object({
+  newEmail: z
+    .string()
+    .refine((val) => val.length > 0, { message: "Please enter your new email" })
+    .refine((val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
+      message: "Please enter a valid email",
+    }),
 });

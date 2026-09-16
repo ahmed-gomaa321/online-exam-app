@@ -7,7 +7,8 @@ import PasswordForm from "./password-form";
 import PersonalInfo from "./personal-info";
 import { getOtpTimeLeft } from "../../../../lib/utils/otp-timer-presisted";
 import Stepper from "./stepper";
-import { useverifyEmail } from "../_hooks/use-register";
+import { useVerifyEmail } from "../_hooks/use-register";
+import useChangeEmail from "@/app/(dashboard)/account-settings/_hooks/use-change-email";
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -15,21 +16,23 @@ export default function RegisterForm() {
   const [currentStep, setCurrentStep] = useState<Step>(1);
   const totalSteps = 4;
   const [timer, setTimer] = useState(getOtpTimeLeft() || 0);
+  const [isMounted, setIsMounted] = useState(false);
 
   // hooks
-  const { verifyEmail, isPending, error } = useverifyEmail();
+  const { verifyEmail, isPending, error } = useVerifyEmail();
 
   // useEffect
   useEffect(() => {
+    setIsMounted(true);
     const timeLeft = getOtpTimeLeft() || 0;
     setTimer(timeLeft);
 
     if (timeLeft > 0) {
       setCurrentStep(2);
-    } else {
-      setCurrentStep(1);
     }
   }, []);
+
+  if (!isMounted) return null;
 
   // render
   const renderStep = () => {
